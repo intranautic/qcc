@@ -55,6 +55,7 @@ int hashmap_grow(Hashmap* hashmap) {
     free(tmp.entries);
     return hashmap->capacity; // return new capacity if ok
   }
+  // not within hashmap range, return -1 error
   return -1;
 }
 
@@ -72,7 +73,7 @@ int hashmap_insert(Hashmap* hashmap, Entry* entry) {
     // if hashmap is full, grow
     if (hashmap->in_use >= hashmap->capacity) {
       if (hashmap_grow(hashmap) == -1)
-        return -1;
+        return -1; // cannot grow hashmap
     }
 
     index = hashmap_hash(entry->key, hashmap->capacity);

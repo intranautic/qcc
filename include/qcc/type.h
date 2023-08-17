@@ -1,6 +1,8 @@
 #ifndef TYPE_H_
 #define TYPE_H_
 
+#include <stdbool.h>
+
 typedef struct type Type;
 struct type {
   enum {
