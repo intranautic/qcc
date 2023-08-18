@@ -1,4 +1,5 @@
-build/
+/qcc
+/build
 
 # Prerequisites
 *.d
