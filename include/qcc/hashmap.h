@@ -28,6 +28,4 @@ void hashmap_destroy(Hashmap* hashmap);
 int hashmap_insert(Hashmap* hashmap, Entry* entry);
 int hashmap_remove(Hashmap* hashmap, const char* key);
 Entry* hashmap_retrieve(Hashmap* hashmap, const char* key);
-
-void entry_dump(Entry* entry);
 #endif // HASHMAP_H_
