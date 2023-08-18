@@ -96,7 +96,7 @@ int hashmap_remove(Hashmap* hashmap, const char* key) {
     index = hashmap_hash(key, hashmap->capacity);
     while (hashmap->entries[index].key) {
       if (!strcmp(hashmap->entries[index].key, key)) {
-        hashmap->entries[index] = (Entry){
+        hashmap->entries[index] = (Entry) {
           .key = 0,
           .value = 0
         };
