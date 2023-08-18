@@ -3,7 +3,7 @@
 
 #include "qcc/hashmap.h"
 
-#define HASHMAP_RANGE(size) (size <= (1ul << 63))
+#define HASHMAP_THRESH(size) (size <= (1ul << 63))
 
 #define FNV64_OFFSET 0xcbf29ce484222325
 #define FNV64_PRIME  0x100000001b3
@@ -40,7 +40,7 @@ int hashmap_grow(Hashmap* hashmap) {
   if (!hashmap)
     return -1;
 
-  if (HASHMAP_RANGE(hashmap->capacity << 1)) {
+  if (HASHMAP_THRESH(hashmap->capacity << 1)) {
     tmp = *hashmap;
     hashmap->capacity <<= 1;
     hashmap->entries = calloc(1, hashmap->capacity * sizeof(Entry));
