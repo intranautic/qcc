@@ -12,6 +12,7 @@ struct type {
     TYPE_LONG,
     TYPE_FLOAT,
     TYPE_DOUBLE,
+    TYPE_LDOUBLE,
     TYPE_ARRAY,
     TYPE_STRUCT,
     TYPE_UNION,

@@ -34,17 +34,17 @@ static Sink* sink_create(int level, FILE* output, Sink* next, Sink* prev) {
 }
 
 int logger_init(void) {
-  g_handler.sinks = hashmap_create();
-  g_handler.head = sink_create(LEVEL_INFO, stderr, 0, 0);
-  return (g_handler.sinks && g_handler.head);
+  g_logger.sinks = hashmap_create();
+  g_logger.head = sink_create(LEVEL_INFO, stderr, 0, 0);
+  return (g_logger.sinks && g_logger.head);
 }
 
 void logger_destroy(void) {
-  if (g_handler.sinks)
-    hashmap_destroy(g_handler.sinks);
+  if (g_logger.sinks)
+    hashmap_destroy(g_logger.sinks);
 
-  if (g_handler.head) {
-    Sink* tmp = g_handler.head;
+  if (g_logger.head) {
+    Sink* tmp = g_logger.head;
     for (Sink* next; tmp; tmp = next) {
       next = tmp->next;
       free(tmp);
@@ -60,7 +60,7 @@ int logger_remove(const char* handle) {}
 void logger_setlevel(const char* handle, int level) {
   // sanity check since were querying hashmap, need valid key
   if (handle) {
-    Sink* sink = hashmap_retrieve(g_handler.sinks, handle).value;
+    Sink* sink = hashmap_retrieve(g_logger.sinks, handle)->value;
     sink->level = level;
   }
   return;
@@ -68,7 +68,7 @@ void logger_setlevel(const char* handle, int level) {
 
 int logger_getlevel(const char* handle) {
   if (handle) {
-    Sink* sink = hashmap_retrieve(g_handler.sinks, handle).value;
+    Sink* sink = hashmap_retrieve(g_logger.sinks, handle)->value;
     if (sink)
       return sink->level;
   }
