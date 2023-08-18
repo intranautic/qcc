@@ -83,8 +83,7 @@ int hashmap_insert(Hashmap* hashmap, Entry* entry) {
       index = ++index % hashmap->capacity;
     }
     // shallow copy, dont hold ref to object since could be stack alloc'd
-    hashmap->entries[index].key = entry->key;
-    hashmap->entries[index].value = entry->value;
+    hashmap->entries[index] = *entry;
     hashmap->in_use++;
   }
   return -1;
