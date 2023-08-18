@@ -1,12 +1,17 @@
 # Quick C Compiler
 
-The Quick C Compiler (qcc) is a toy retargetable, optimizing and
-self-hosting C compiler for the ISO C99 standard written from scratch.
+The Quick C Compiler (qcc) is a retargetable, optimizing and self-hosting
+C compiler for the ISO C99 standard written from scratch.
 
 For more information on the internal architecture and implementation of the
 compiler, please view the [documentation](/docs). If you would like to
 contribute to the project, please view the [contributing](/CONTRIBUTING.MD)
 document before submitting a pull request.
+
+## Status
+
+Current status of the project. Update once we have a fully working skeleton
+implemented and update this to keep track of progress + todo.
 
 ## License
 
