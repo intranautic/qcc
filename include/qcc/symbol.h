@@ -26,12 +26,15 @@ struct symbol {
     SYM_IDENT,
     SYM_TYPE
   } kind;
+  int scope;
   Type type;
   Token* token; // token containing name
-  Symtab* scope; // scope which symbol belongs to
+  Symtab* table; // symbol table which symbol belongs to
 };
 
 struct symtab {
+  // current scope, we lazily allocate scopes so we need to keep track
+  int current;
   Hashmap* symbols;
   Symtab* up; // up scope
   Symtab* down; // down scope
@@ -46,7 +49,7 @@ struct symtab {
 };
 
 /* construction and destruction methods for symtab */
-Symtab* symtab_create();
+Symtab* symtab_create(void);
 void symtab_destroy(Symtab* symtab);
 
 /* traverses up prev scopes and searches each hashmap for identifier */

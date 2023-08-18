@@ -20,7 +20,7 @@ typedef struct hashmap Hashmap;
 hash_t hashmap_hash(const char* key, size_t size);
 
 /* hashmap creation, deletion and designation operations */
-Hashmap* hashmap_create();
+Hashmap* hashmap_create(void);
 int hashmap_grow(Hashmap* hashmap);
 void hashmap_destroy(Hashmap* hashmap);
 
