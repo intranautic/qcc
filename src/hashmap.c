@@ -80,7 +80,7 @@ int hashmap_insert(Hashmap* hashmap, Entry* entry) {
     while (hashmap->entries[index].key) {
       if (!strcmp(hashmap->entries[index].key, entry->key))
         return index; // already exists
-      index = ++index % hashmap->capacity;
+      index = (index + 1) % hashmap->capacity;
     }
     // shallow copy, dont hold ref to object since could be stack alloc'd
     hashmap->entries[index] = *entry;
@@ -102,7 +102,7 @@ int hashmap_remove(Hashmap* hashmap, const char* key) {
         hashmap->in_use--;
         return index;
       }
-      index = ++index % hashmap->capacity;
+      index = (index + 1) % hashmap->capacity;
     }
   }
   return -1;
@@ -115,7 +115,7 @@ Entry* hashmap_retrieve(Hashmap* hashmap, const char* key) {
     while (hashmap->entries[index].key) {
       if (!strcmp(hashmap->entries[index].key, key))
         return &hashmap->entries[index];
-      index = ++index % hashmap->capacity;
+      index = (index + 1) % hashmap->capacity;
     }
   }
   // null for error, no entry found
