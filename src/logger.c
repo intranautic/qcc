@@ -3,10 +3,6 @@
 #include "qcc/logger.h"
 #include "qcc/color.h"
 
-/*
-  TODO: we might have to synchronize here, but since this is single threaded
-  i dont care if its thread unsafe
-*/
 
 struct logger {
   Hashmap* sinks;

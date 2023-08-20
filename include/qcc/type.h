@@ -23,7 +23,6 @@ struct type {
   } kind;
   int align;
   int size;
-  bool is_unsigned;
   union {
   };
 };

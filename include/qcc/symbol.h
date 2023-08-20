@@ -1,28 +1,8 @@
 #ifndef SYMBOL_H_
 #define SYMBOL_H_
 
-#include "qcc/token.h"
-#include "qcc/type.h"
-#include "qcc/hashmap.h"
-#include "qcc/list.h"
-
 typedef struct symbol Symbol;
 typedef struct symtab Scope;
-
-struct symbol {
-  Token* ident;
-  Scope* scope;
-  Type type;
-};
-
-struct scope {
-  // table of symbols per scope
-  Hashmap* lookup;
-  // parent scope
-  Scope* parent;
-  // list of successor/nested scopes
-  List* succ;
-};
 
 typedef struct symtab Symtab;
 struct symtab {
@@ -30,4 +10,12 @@ struct symtab {
   Scope* current;
 };
 
+Symtab* symtab_create(void);
+void symtab_destroy(Symtab* table);
+
+int symtab_enter(Symtab* table);
+int symtab_leave(Symtab* table);
+int symtab_install(Symtab* table, Symbol* symbol);
+
+Symbol* scope_lookup(Scope* scope);
 #endif // SYMBOL_H_

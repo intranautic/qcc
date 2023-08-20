@@ -8,6 +8,7 @@
 #define FNV64_OFFSET 0xcbf29ce484222325
 #define FNV64_PRIME  0x100000001b3
 
+
 struct hashmap {
   Entry* entries;
   size_t in_use;

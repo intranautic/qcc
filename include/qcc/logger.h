@@ -6,6 +6,7 @@
 
 #include "qcc/hashmap.h"
 
+
 typedef struct sink Sink;
 struct sink {
   enum {

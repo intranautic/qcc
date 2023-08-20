@@ -9,6 +9,7 @@
 
 #define HASHMAP_DEFAULT (1 << 4)
 
+
 typedef unsigned long hash_t;
 typedef struct entry Entry;
 struct entry {

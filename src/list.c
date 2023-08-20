@@ -3,6 +3,7 @@
 
 #include "qcc/list.h"
 
+
 List* list_create(void* value) {
   List* list = calloc(1, sizeof(List));
   list->value = value;
