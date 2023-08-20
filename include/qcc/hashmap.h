@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "qcc/list.h"
+
 #define HASHMAP_DEFAULT (1 << 4)
 
 typedef unsigned long hash_t;
@@ -28,4 +30,7 @@ void hashmap_destroy(Hashmap* hashmap);
 int hashmap_insert(Hashmap* hashmap, Entry* entry);
 int hashmap_remove(Hashmap* hashmap, const char* key);
 Entry* hashmap_retrieve(Hashmap* hashmap, const char* key);
+
+/* retrieves all entries present in the hashmap */
+List* hashmap_enumerate(Hashmap* hashmap);
 #endif // HASHMAP_H_

@@ -2,6 +2,7 @@
 #define QCC_H_
 
 #include "qcc/hashmap.h"
+#include "qcc/list.h"
 #include "qcc/logger.h"
 
 typedef struct qcc Qcc;

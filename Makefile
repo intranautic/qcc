@@ -20,7 +20,7 @@ $(MAIN): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(MAIN)
 
 debug:
-	$(MAKE) all DEBUG=-DDEBUG
+	$(MAKE) all DEBUG=-DQCC_DEBUG
 
 clean:
 	rm -rf $(MAIN) $(OBJS)

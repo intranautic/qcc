@@ -122,3 +122,19 @@ Entry* hashmap_retrieve(Hashmap* hashmap, const char* key) {
   return 0;
 }
 
+List* hashmap_enumerate(Hashmap* hashmap) {
+  List* entries;
+  if (hashmap && hashmap->in_use > 0) {
+    entries = list_create(0);
+    if (!entries)
+      return (void *)-1; // failed to alloc return -1 error
+
+    for (size_t i = 0; i < hashmap->capacity; ++i) {
+      if (hashmap->entries[i].key)
+        list_push(entries, &hashmap->entries[i].key);
+    }
+    return entries;
+  }
+  return 0;
+}
+
