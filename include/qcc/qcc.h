@@ -3,7 +3,8 @@
 
 #include "qcc/hashmap.h"
 #include "qcc/list.h"
-#include "qcc/logger.h"
+#include "qcc/source.h"
+
 
 typedef struct qcc Qcc;
 struct Qcc {};

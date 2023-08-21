@@ -21,9 +21,4 @@ struct scope {
   List* succ;
 };
 
-static Symbol* symbol_create();
-static void symbol_destroy(Symbol* symbol);
-
-static Scope* scope_create();
-static void scope_destroy(Scope* scope);
 
