@@ -30,4 +30,3 @@ int logger_warning(const char* fmt, ...);
 int logger_error(const char* fmt, ...);
 void logger_fatal(int error, const char* fmt, ...);
 #endif // LOGGER_H_
-
