@@ -30,19 +30,18 @@ hash_t hashmap_hash(const char* key, size_t size) {
 
 Hashmap* hashmap_create() {
   Hashmap* hashmap = malloc(sizeof(Hashmap));
-  hashmap->entries = malloc(HASHMAP_DEFAULT * sizeof(Entry));
+  hashmap->entries = calloc(1, HASHMAP_DEFAULT * sizeof(Entry));
   hashmap->in_use = 0;
   hashmap->capacity = HASHMAP_DEFAULT;
   return hashmap;
 }
 
 int hashmap_grow(Hashmap* hashmap) {
-  Hashmap tmp;
   if (!hashmap)
     return -1;
 
   if (HASHMAP_THRESH(hashmap->capacity << 1)) {
-    tmp = *hashmap;
+    Hashmap tmp = *hashmap;
     hashmap->capacity <<= 1;
     hashmap->entries = calloc(1, hashmap->capacity * sizeof(Entry));
     // rehash each entry by insert

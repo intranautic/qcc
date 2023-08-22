@@ -15,7 +15,8 @@ struct symbol {
 };
 
 struct scope {
-  bool is_leave;
+  int size; // if empty dont perform lookup
+  bool is_leave; // if set allocate new scope from parent
   Hashmap* lookup;
   Scope* parent;
   List* succ;

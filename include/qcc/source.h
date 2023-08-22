@@ -13,6 +13,7 @@ struct source {
   size_t size;
 };
 
+/* constructor/fill/destructor methods for source, fairly simple */
 Source* source_create(const char* path);
 int source_fill(Source* source);
 void source_destroy(Source* source);

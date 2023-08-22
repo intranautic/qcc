@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include "qcc/source.h"
+#include "qcc/logger.h"
 
 
 Source* source_create(const char* path) {
   FILE* tmp = fopen(path, "rb");
   if (!tmp)
-    return 0; //TODO: error log
+    return 0;
 
   Source* source = malloc(sizeof(Source));
   source->path = path;
