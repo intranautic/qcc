@@ -9,15 +9,7 @@
 #define LOG_RANGE(level) \
   (LOG_SILENT <= level && level <= LOG_FATAL)
 
-
 static Logger g_logger;
-static const char* g_severity[] = {
-  [LOG_SILENT] = BGRN "[SILENT]:",
-  [LOG_INFO] = BCYN "[INFO]:",
-  [LOG_WARNING] = BYEL "[WARNING]:",
-  [LOG_ERROR] = BRED "[ERROR]:",
-  [LOG_FATAL] = BMAG "[FATAL]:"
-};
 
 struct sink {
   level_t level;
@@ -81,6 +73,14 @@ void logger_setlevel(const char* handle, level_t level) {
 }
 
 static int logger_internal(level_t level, const char* fmt, va_list args) {
+  static const char* g_severity[] = {
+    [LOG_SILENT] = BGRN "[SILENT]:",
+    [LOG_INFO] = BCYN "[INFO]:",
+    [LOG_WARNING] = BYEL "[WARNING]:",
+    [LOG_ERROR] = BRED "[ERROR]:",
+    [LOG_FATAL] = BMAG "[FATAL]:"
+  };
+
   Sink* sink;
   if (list_length(g_logger.sinks)) {
     for (List* entry = g_logger.sinks; entry->next; entry = entry->next) {

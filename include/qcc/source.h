@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 
-
 typedef struct source Source;
 struct source {
   FILE* file;
@@ -11,6 +10,7 @@ struct source {
   char* contents;
   char* cursor;
   size_t size;
+  int line;
 };
 
 /* constructor/fill/destructor methods for source, fairly simple */

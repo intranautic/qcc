@@ -6,7 +6,7 @@
 #include "qcc/source.h"
 #include "qcc/logger.h"
 
+#include "qcc/token.h"
+#include "qcc/lexer.h"
 
-typedef struct qcc Qcc;
-struct Qcc {};
 #endif // QCC_H_

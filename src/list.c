@@ -68,12 +68,16 @@ void* list_retrieve(List* list, int index) {
 }
 
 int list_fpush(List** list, void* value) {
-  if (!list || !(*list))
+  if (!list)
     return -1;
 
-  List* tmp = list_create(value);
-  tmp->next = *list;
-  *list = tmp;
+  if (*list) {
+    List* tmp = list_create(value);
+    tmp->next = *list;
+    *list = tmp;
+  } else
+    *list = list_create(value);
+
   return 0;
 }
 

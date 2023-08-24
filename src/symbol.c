@@ -7,7 +7,6 @@
 #include "qcc/hashmap.h"
 #include "qcc/list.h"
 
-
 struct symbol {
   Token* ident;
   Scope* scope;

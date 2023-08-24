@@ -8,7 +8,6 @@
 #define FNV64_OFFSET 0xcbf29ce484222325
 #define FNV64_PRIME  0x100000001b3
 
-
 struct hashmap {
   Entry* entries;
   size_t in_use;
@@ -125,13 +124,11 @@ Entry* hashmap_retrieve(Hashmap* hashmap, const char* key) {
 List* hashmap_enumerate(Hashmap* hashmap) {
   List* entries;
   if (hashmap && hashmap->in_use > 0) {
-    entries = list_create(0);
-    if (!entries)
-      return (void *)-1; // failed to alloc return -1 error
+    entries = NULL;
 
     for (size_t i = 0; i < hashmap->capacity; ++i) {
       if (hashmap->entries[i].key)
-        list_push(entries, &hashmap->entries[i].key);
+        list_fpush(&entries, &hashmap->entries[i].key);
     }
     return entries;
   }

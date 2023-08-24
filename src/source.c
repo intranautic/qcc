@@ -1,7 +1,5 @@
 #include <stdlib.h>
 #include "qcc/source.h"
-#include "qcc/logger.h"
-
 
 Source* source_create(const char* path) {
   FILE* tmp = fopen(path, "rb");
