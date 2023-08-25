@@ -94,9 +94,9 @@ struct token {
     TK_EOF,
     TK_NONE = -1
   } kind;
-  void* value;
-  char* loc;
   int length;
+  char* loc;
+  void* value;
 };
 
 /* token constructor/destructor methods */

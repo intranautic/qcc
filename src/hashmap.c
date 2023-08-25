@@ -108,11 +108,15 @@ int hashmap_remove(Hashmap* hashmap, const char* key) {
 }
 
 Entry* hashmap_retrieve(Hashmap* hashmap, const char* key) {
+  return hashmap_nretrieve(hashmap, key, strlen(key));
+}
+
+Entry* hashmap_nretrieve(Hashmap* hashmap, const char* key, int len) {
   hash_t index;
   if (hashmap) {
     index = hashmap_hash(key, hashmap->capacity);
     while (hashmap->entries[index].key) {
-      if (!strcmp(hashmap->entries[index].key, key))
+      if (!strncmp(hashmap->entries[index].key, key, len))
         return &hashmap->entries[index];
       index = (index + 1) % hashmap->capacity;
     }

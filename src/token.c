@@ -23,8 +23,17 @@ int token_compare(Token* token, const char* string) {
 }
 
 #ifdef QCC_DEBUG
+//lazy
+#include <stdio.h>
 void token_dump(Token* token) {
-
+  if (token) {
+    printf("token {\n\tkind: %d\n\tlength: %d\n\tloc: %p\n\tvalue: %lx\n}\n",
+      token->kind,
+      token->length,
+      token->loc,
+      token->value
+    );
+  }
   return;
 }
 #endif // QCC_DEBUG

@@ -33,3 +33,11 @@ void source_destroy(Source* source) {
   }
   return;
 }
+
+void source_dump(Source* source) {
+  if (source) {
+    printf("Source {\n\tpath: %s\n\tcursor: %s\n\tline: %d\n}\n",
+      source->path, source->cursor, source->line);
+  }
+  return;
+}

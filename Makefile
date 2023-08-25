@@ -5,7 +5,7 @@ SRC_DIR    = src
 HEADER_DIR = include
 
 HEADERS    = $(wildcard include/$(MAIN)/*.h)
-CFLAGS     = -Wall -D_DEFAULT_SOURCE $(DEBUG) -std=c99 -O2 -I include
+CFLAGS     = -D_DEFAULT_SOURCE $(DEBUG) -std=c99 -O2 -I include
 
 SRCS       = $(wildcard src/*.c)
 OBJS       = $(SRCS:%.c=%.o)
@@ -19,13 +19,13 @@ all: $(MAIN)
 $(MAIN): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(MAIN)
 
-debug:
-	$(MAKE) all DEBUG=-DQCC_DEBUG
-
 clean:
 	rm -rf $(MAIN) $(OBJS)
 	find . -name "*~" -exec rm {} \;
 	find . -name "*.o" -exec rm {} \;
+
+debug: clean
+	$(MAKE) all DEBUG=-DQCC_DEBUG
 
 format:
 	clang-format -i $(SRCS) $(HEADERS)

@@ -17,4 +17,5 @@ struct source {
 Source* source_create(const char* path);
 int source_fill(Source* source);
 void source_destroy(Source* source);
+void source_dump(Source* source);
 #endif // SOURCE_H_

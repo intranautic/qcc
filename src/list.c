@@ -126,7 +126,7 @@ int list_length(List* list) {
   if (list) {
     tmp = list;
     int len;
-    for (len=0; tmp->next; ++len)
+    for (len=1; tmp->next; ++len)
       tmp = tmp->next;
     return len;
   }
