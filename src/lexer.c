@@ -5,11 +5,17 @@
 
 #include "qcc/keyword.h"
 
+#define NEXT(ptr) (*(ptr + 1))
 #define IS_NUMERIC(c) ('0' <= c && c <= '9')
 #define IS_ALPHA(c) (('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z'))
-// first char of identifier cannot be numerical
 #define IS_IDENT0(c) (IS_ALPHA(c) || c == '_')
 #define IS_IDENT1(c) (IS_ALPHA(c) || c == '_' || IS_NUMERIC(c))
+#define IS_CHARCONST(c) (c == '\'')
+#define IS_STRCONST(c) (c == '\"')
+#define IS_WIDE(c) (c == 'L' || c == 'U')
+#define IS_WIDECHARCONST(c1, c2) (IS_WIDE(c1) && c2 == '\'')
+#define IS_WIDESTRCONST(c1, c2) (IS_WIDE(c1) && c2 == '\"')
+
 
 Lexer* lexer_create(List* sources) {
   Lexer* lexer = malloc(sizeof(Lexer));
@@ -22,7 +28,7 @@ Lexer* lexer_create(List* sources) {
       .value = (void *)kwrd_map[i]
     });
   }
-
+  // TODO: implement incremental preprocessor
   lexer->macros = hashmap_create();
   // load pre defined macro map
   lexer->cache = NULL;
@@ -46,15 +52,8 @@ static Token* lexer_identifier(Source* source) {
   while (IS_IDENT1(*source->cursor))
     source->cursor++;
 
-  return token_create(TK_IDENTIFIER, origin, ++source->cursor - origin, 0);
+  return token_create(TK_IDENTIFIER, origin, (++source->cursor-origin)-1, 0);
 }
-
-static Token* lexer_floatconst(Source* source) {}
-static Token* lexer_intconst(Source* source) {}
-static Token* lexer_numconst(Source* source) {}
-
-static Token* lexer_charconst(Source* source) {}
-static Token* lexer_strconst(Source* source) {}
 
 static int handle_ignore(Source* source) {
   while (*source->cursor) {
@@ -88,19 +87,31 @@ static int lexer_comment(Source* source) {
       while (*source->cursor) {
         if (*source->cursor == '\n')
           delta++;
-
-        if (*source->cursor == '*') {
-          if (*++source->cursor == '/') {
-            source->cursor++;
+        else if (*source->cursor == '*') {
+          if (NEXT(source->cursor) == '/') {
+            source->cursor += 2;
             break;
           }
         }
         source->cursor++;
+        if (!*source->cursor) {
+          logger_fatal(-1, "Unterminated multi-line comment %s:%d\n",
+            source->path, source->line);
+        }
       }
       return delta;
   }
   return -1;
 }
+
+static Token* lexer_floatconst(Source* source) {}
+static Token* lexer_intconst(Source* source) {}
+static Token* lexer_numconst(Source* source) {}
+
+static Token* lexer_widecharconst(Source* source) {}
+static Token* lexer_charconst(Source* source) {}
+static Token* lexer_widestrconst(Source* source) {}
+static Token* lexer_strconst(Source* source) {}
 
 Token* lexer_get(Lexer* lexer) {
   Source* source;
@@ -143,7 +154,27 @@ Token* lexer_get(Lexer* lexer) {
       if (IS_NUMERIC(*source->cursor))
         return lexer_numconst(source);
 
-    }
+      // tokenize wide utf character constants
+      if (IS_WIDECHARCONST(*source->cursor, NEXT(source->cursor)))
+        return lexer_widecharconst(source);
+
+      // tokenize character constants
+      if (IS_CHARCONST(*source->cursor))
+        return lexer_charconst(source);
+
+      if (IS_WIDESTRCONST(*source->cursor, NEXT(source->cursor)))
+        return lexer_widestrconst(source);
+
+      // tokenize character constants
+      if (IS_STRCONST(*source->cursor))
+        return lexer_strconst(source);
+
+      if (*source->cursor == '#') {
+        // handle preprocessor directive here
+      }
+
+    } else
+      return token_create(TK_EOF, source->cursor, 0, 0);
   }
   return 0;
 }
@@ -151,3 +182,9 @@ Token* lexer_get(Lexer* lexer) {
 Token* lexer_peek(Lexer* lexer) {}
 int lexer_eat(Lexer* lexer) {}
 
+#ifdef QCC_DEBUG
+void lexer_dump(Lexer* lexer) {}
+#endif // QCC_DEBUG
+
+/* incremental preprocessor handled during lexing phase */
+static int preprocess_directive(Lexer* lexer) {}

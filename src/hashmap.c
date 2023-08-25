@@ -14,9 +14,9 @@ struct hashmap {
   size_t capacity;
 };
 
-static hash_t fnv1a_hash64(const char* input) {
+static hash_t fnv1a_hash64(const char* input, size_t length) {
   size_t hash = FNV64_OFFSET;
-  for (int i = 0; input[i]; ++i) {
+  for (int i = 0; i < length; ++i) {
     hash ^= input[i];
     hash *= FNV64_PRIME;
   }
@@ -24,7 +24,11 @@ static hash_t fnv1a_hash64(const char* input) {
 }
 
 hash_t hashmap_hash(const char* key, size_t size) {
-  return fnv1a_hash64(key) % size;
+  return fnv1a_hash64(key, strlen(key)) % size;
+}
+
+hash_t hashmap_nhash(const char* key, size_t size, size_t length) {
+  return fnv1a_hash64(key, length) % size;
 }
 
 Hashmap* hashmap_create() {
@@ -111,13 +115,14 @@ Entry* hashmap_retrieve(Hashmap* hashmap, const char* key) {
   return hashmap_nretrieve(hashmap, key, strlen(key));
 }
 
-Entry* hashmap_nretrieve(Hashmap* hashmap, const char* key, int len) {
+Entry* hashmap_nretrieve(Hashmap* hashmap, const char* key, size_t length) {
   hash_t index;
   if (hashmap) {
-    index = hashmap_hash(key, hashmap->capacity);
+    index = hashmap_nhash(key, hashmap->capacity, length);
     while (hashmap->entries[index].key) {
-      if (!strncmp(hashmap->entries[index].key, key, len))
+      if (!strncmp(hashmap->entries[index].key, key, length)) {
         return &hashmap->entries[index];
+      }
       index = (index + 1) % hashmap->capacity;
     }
   }

@@ -5,13 +5,12 @@ typedef struct token Token;
 struct token {
   enum {
     TK_IDENTIFIER,
-    TK_TYPE,
     TK_KEYWORD,
 
     // literals
     TK_LCHAR,
     TK_LSTRING,
-    TK_LNUMBER,
+    TK_LINTEGER,
     TK_LFLOAT,
 
     // binary operators
@@ -86,6 +85,7 @@ struct token {
 
     // preprocessor
     TK_DIRECTIVE,
+    TK_MACRO,
     TK_BACKSLASH,
     TK_PPNUMBER,
     TK_PPCHAR,
