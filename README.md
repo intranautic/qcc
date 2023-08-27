@@ -13,6 +13,34 @@ document before submitting a pull request.
 Current status of the project. Update once we have a fully working skeleton
 implemented and update this to keep track of progress + todo.
 
+## Build
+
+To build the project run the following command.
+
+```sh
+make
+```
+
+If you want to compile and install qcc, run the following command with sudo
+in the root directory of the repository.
+
+```sh
+sudo ./scripts/install.sh
+```
+
+You can uninstall the project by passing the `--uninstall` flag to `install.sh`.
+
+```sh
+sudo ./scripts/install.sh --uninstall
+```
+
+For the unit tests, there is a tool provided which automatically tests the
+project. To do so run the following command.
+
+```sh
+./tools/run_tests.sh
+```
+
 ## License
 
 This project is licensed under the [MIT](/LICENSE) license.
