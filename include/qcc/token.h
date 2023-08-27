@@ -1,10 +1,15 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
+
+#define TOKEN_DEBUG(tok) \
+  "token {\n\tkind: %s\n\tlength: %d\n\tlocation: %p\n\tvalue: %lx\n}\n", \
+  token_tostring(tok->kind), tok->length, tok->loc, tok->value
+
 typedef struct token Token;
 struct token {
   enum {
-    TK_IDENTIFIER,
+    TK_IDENTIFIER = 1,
     TK_KEYWORD,
 
     // literals
@@ -88,7 +93,7 @@ struct token {
     TK_PPSTRING,
 
     TK_EOF,
-    TK_NONE = -1
+    TK_NONE = 0
   } kind;
   int length;
   char* loc;
@@ -99,8 +104,9 @@ struct token {
 Token* token_create(int kind, char* loc, int length, void* value);
 void token_destroy(Token* token);
 
-/* compare token with a string */
+/* debugging routines for token */
 int token_compare(Token* token, const char* string);
+const char* token_tostring(int kind);
 #ifdef QCC_DEBUG
 void token_dump(Token* token);
 #endif // QCC_DEBUG

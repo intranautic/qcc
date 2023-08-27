@@ -2,9 +2,11 @@
 #define SOURCE_H_
 
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct source Source;
 struct source {
+  bool is_ready;
   FILE* file;
   const char* path;
   char* contents;

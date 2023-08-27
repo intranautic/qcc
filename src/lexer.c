@@ -14,10 +14,8 @@
 #define IS_CHARCONST(c) (c == '\'')
 #define IS_STRCONST(c) (c == '\"')
 #define IS_WIDE(c) (c == 'L' || c == 'U')
-
 #define IS_WIDECHARCONST(c1, c2) \
   (IS_WIDE(c1) && c2 == '\'')
-
 #define IS_WIDESTRCONST(c1, c2) \
   (IS_WIDE(c1) && c2 == '\"')
 
@@ -51,7 +49,10 @@ void lexer_destroy(Lexer* lexer) {
   return;
 }
 
-// TODO: handle directives are implemented in the lexer
+//TODO:
+/* incremental preprocessor handled during lexing phase */
+static int lexer_preprocess(Lexer* lexer) {}
+
 static Token* lexer_identifier(Source* source) {
   char* origin = source->cursor;
   while (IS_IDENT1(*source->cursor))
@@ -107,6 +108,22 @@ static int lexer_comment(Source* source) {
       return delta;
   }
   return -1;
+}
+
+static int lexer_skip(Source* source) {
+  int delta = 0;
+  handle_ignore(source);
+  while (*source->cursor == '/') {
+    source->cursor++;
+    delta = lexer_comment(source);
+    if (delta == -1) {
+      logger_fatal(-1, "Could not tokenize comment %s:%d\n",
+        source->path, source->line);
+    }
+    source->line += delta;
+    handle_ignore(source);
+  }
+  return delta;
 }
 
 static Token* lexer_floatconst(Source* source) {}
@@ -254,79 +271,95 @@ static Token* lexer_opsep(Source* source) {
   return token_create(tok.kind, tok.loc, tok.length, tok.value);
 }
 
+static Token* lexer_internal(Lexer* lexer) {
+  Source* source = (Source *)lexer->sources->value;
+  if (*source->cursor) {
+    lexer_skip(source);
+
+    // handle preprocessor directive here
+    while (*source->cursor == '#') {
+      lexer_preprocess(lexer);
+      source = (Source *)lexer->sources->value;
+      lexer_skip(source);
+    }
+
+    // tokenize identifiers or keywords
+    if (IS_IDENT0(*source->cursor)) {
+      Token* tok = lexer_identifier(source);
+      if (!tok) { 
+        logger_fatal(-1, "Could not tokenize identifier %s:%d\n",
+          source->path, source->line);
+      }
+
+      // if identifier is a keyword, return keyword token instead
+      Entry* kwrd_entry =
+        hashmap_nretrieve(lexer->keywords, tok->loc, tok->length);
+
+      if (kwrd_entry) {
+        tok->kind = TK_KEYWORD;
+        tok->value = (Keyword *)kwrd_entry->value;
+      }
+      return tok;
+    }
+
+    // tokenize numeric constants
+    if (IS_NUMERIC(*source->cursor))
+      return lexer_numconst(source);
+
+    // tokenize wide utf character constants
+    if (IS_WIDECHARCONST(*source->cursor, NEXT(source->cursor)))
+      return lexer_widecharconst(source);
+
+    if (IS_WIDESTRCONST(*source->cursor, NEXT(source->cursor)))
+      return lexer_widestrconst(source);
+
+    if (IS_CHARCONST(*source->cursor))
+      return lexer_charconst(source);
+
+    if (IS_STRCONST(*source->cursor))
+      return lexer_strconst(source);
+
+    // tokenize operators and separators
+    Token* tok = lexer_opsep(source);
+    if (tok)
+      return tok;
+  }
+  return token_create(TK_EOF, source->cursor, 0, 0);
+}
+
 Token* lexer_get(Lexer* lexer) {
-  Source* source;
   if (lexer && list_length(lexer->sources) > 0) {
-    source = (Source *)lexer->sources->value;
-    if (*source->cursor) {
-      // skip ignore chars and comments
-      handle_ignore(source);
-      while (*source->cursor == '/') {
-        source->cursor++;
-        int delta = lexer_comment(source);
-        if (delta == -1) {
-          logger_fatal(-1, "Could not tokenize comment %s:%d\n",
-            source->path, source->line);
-        }
-        source->line += delta;
-        handle_ignore(source);
-      }
+    Source* source = (Source *)lexer->sources->value;
+    if (!source->is_ready)
+      source_fill(source);
 
-      // tokenize identifiers or keywords
-      if (IS_IDENT0(*source->cursor)) {
-        Token* tok = lexer_identifier(source);
-        if (!tok) { 
-          logger_fatal(-1, "Could not tokenize identifier %s:%d\n",
-            source->path, source->line);
-        }
-
-        // if identifier is a keyword, return keyword token instead
-        Entry* kwrd_entry =
-          hashmap_nretrieve(lexer->keywords, tok->loc, tok->length);
-
-        if (kwrd_entry) {
-          tok->kind = TK_KEYWORD;
-          tok->value = (Keyword *)kwrd_entry->value;
-        }
-        return tok;
-      }
-
-      // tokenize numeric constants
-      if (IS_NUMERIC(*source->cursor))
-        return lexer_numconst(source);
-
-      // tokenize wide utf character constants
-      if (IS_WIDECHARCONST(*source->cursor, NEXT(source->cursor)))
-        return lexer_widecharconst(source);
-
-      if (IS_WIDESTRCONST(*source->cursor, NEXT(source->cursor)))
-        return lexer_widestrconst(source);
-
-      if (IS_CHARCONST(*source->cursor))
-        return lexer_charconst(source);
-
-      if (IS_STRCONST(*source->cursor))
-        return lexer_strconst(source);
-
-      // handle preprocessor directive here
-      if (*source->cursor == '#') {}
-
-      // tokenize operators and separators
-      Token* tok = lexer_opsep(source);
-      if (tok)
-        return tok;
-    } else
-      return token_create(TK_EOF, source->cursor, 0, 0);
+    Token* tok = lexer_internal(lexer);
+    if (tok->kind == TK_EOF) {
+      source_destroy(source);
+      list_fpop(&lexer->sources);
+    }
+    return tok;
   }
   return 0;
 }
 
-Token* lexer_peek(Lexer* lexer) {}
-int lexer_eat(Lexer* lexer) {}
+Token* lexer_peek(Lexer* lexer) {
+  Token* tok;
+  if (tok = lexer_get(lexer)) {
+    Source* source = (Source *)lexer->sources->value;
+    source->cursor -= tok->length;
+    return tok;
+  }
+  return 0;
+}
 
-#ifdef QCC_DEBUG
-void lexer_dump(Lexer* lexer) {}
-#endif // QCC_DEBUG
+int lexer_eat(Lexer* lexer) {
+  Token* tok;
+  if (tok = lexer_get(lexer)) {
+    int length = tok->length;
+    free(tok);
+    return length;
+  }
+  return 0;
+}
 
-/* incremental preprocessor handled during lexing phase */
-static int preprocess_directive(Lexer* lexer) {}

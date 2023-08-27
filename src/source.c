@@ -7,6 +7,7 @@ Source* source_create(const char* path) {
     return 0;
 
   Source* source = malloc(sizeof(Source));
+  source->is_ready = false;
   source->path = path;
   source->file = tmp;
   source->contents = source->cursor = NULL;
@@ -19,7 +20,8 @@ Source* source_create(const char* path) {
 
 int source_fill(Source* source) {
   if (source && !source->contents) {
-    source->contents = source->cursor = malloc(source->size + 1);
+    source->is_ready = true;
+    source->contents = source->cursor = calloc(1, source->size + 1);
     return fread(source->contents, source->size, 1, source->file);
   }
   return 0;

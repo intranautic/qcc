@@ -29,9 +29,4 @@ Token* lexer_peek(Lexer* lexer);
 
 /* move pointer and dont return token, returns the increment of pointer */
 int lexer_eat(Lexer* lexer);
-
-#ifdef QCC_DEBUG
-/* dump state of lexer */
-void lexer_dump(Lexer* lexer);
-#endif // QCC_DEBUG
 #endif // LEXER_H_

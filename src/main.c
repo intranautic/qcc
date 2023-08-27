@@ -5,17 +5,26 @@ int main(int argc, const char** argv) {
   logger_init();
   logger_register("default", LOG_INFO, stderr);
 
-  if (argv[1]) {
-    List* sources = list_create(source_create(argv[1]));
-    source_fill((Source *)sources->value);
-    Lexer* lexer = lexer_create(sources);
-    Token* tok = lexer_get(lexer);
-    token_dump(tok);
-    lexer_destroy(lexer);
-    source_destroy((Source *)sources->value);
-    list_destroy(sources);
-  } else
-    logger_error("Usage: %s <path>\n", argv[0]);
+  List* sources = NULL;
+  Source* tmp;
+  for (int i = 1; i < argc; ++i) {
+    tmp = source_create(argv[i]);
+    if (tmp) {
+      logger_info("Registered source: %s\n", argv[i]);
+      source_fill(tmp);
+      list_fpush(&sources, tmp);
+    }
+  }
+
+  Lexer* lexer = lexer_create(sources);
+  Token* tok;
+  logger_info("Starting tokenization loop\n");
+  while (tok = lexer_get(lexer)) {
+    logger_info(TOKEN_DEBUG(tok));
+    token_destroy(tok);
+  }
+
+  lexer_destroy(lexer);
   logger_destroy();
   return 0;
 }
