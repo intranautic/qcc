@@ -13,6 +13,10 @@ document before submitting a pull request.
 Current status of the project. Update once we have a fully working skeleton
 implemented and update this to keep track of progress + todo.
 
+* Currently working on implementing the incremental lexer, preprocessor and
+  the parser. These frontend components all execute in the same pass due to
+  the lexer and preprocessors incremental nature.
+
 ## Build
 
 To build the project run the following command.
