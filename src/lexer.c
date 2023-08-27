@@ -6,6 +6,7 @@
 #include "qcc/keyword.h"
 
 #define NEXT(ptr) (*(ptr + 1))
+#define NEXT2(ptr) (*(ptr + 2))
 #define IS_NUMERIC(c) ('0' <= c && c <= '9')
 #define IS_ALPHA(c) (('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z'))
 #define IS_IDENT0(c) (IS_ALPHA(c) || c == '_')
@@ -13,8 +14,12 @@
 #define IS_CHARCONST(c) (c == '\'')
 #define IS_STRCONST(c) (c == '\"')
 #define IS_WIDE(c) (c == 'L' || c == 'U')
-#define IS_WIDECHARCONST(c1, c2) (IS_WIDE(c1) && c2 == '\'')
-#define IS_WIDESTRCONST(c1, c2) (IS_WIDE(c1) && c2 == '\"')
+
+#define IS_WIDECHARCONST(c1, c2) \
+  (IS_WIDE(c1) && c2 == '\'')
+
+#define IS_WIDESTRCONST(c1, c2) \
+  (IS_WIDE(c1) && c2 == '\"')
 
 
 Lexer* lexer_create(List* sources) {
@@ -113,6 +118,142 @@ static Token* lexer_charconst(Source* source) {}
 static Token* lexer_widestrconst(Source* source) {}
 static Token* lexer_strconst(Source* source) {}
 
+static Token* lexer_opsep(Source* source) {
+  Token tok;
+  switch (*source->cursor) {
+    case '+':
+      switch (NEXT(source->cursor)) {
+        case '+':
+          tok = (Token){TK_INC, 2, source->cursor, 0};
+          break;
+        case '=':
+          tok = (Token){TK_ASGN_ADD, 2, source->cursor, 0};
+          break;
+        default:
+          tok = (Token){TK_ADD, 1, source->cursor, 0};
+          break;
+      }
+      break;
+    case '-':
+      switch (NEXT(source->cursor)) {
+        case '-':
+          tok = (Token){TK_DEC, 2, source->cursor, 0};
+          break;
+        case '=':
+          tok = (Token){TK_ASGN_SUB, 2, source->cursor, 0};
+          break;
+        case '>':
+          tok = (Token){TK_ARROW, 2, source->cursor, 0};
+          break;
+        default:
+          tok = (Token){TK_SUB, 1, source->cursor, 0};
+          break;
+      }
+      break;
+    case '&':
+      switch (NEXT(source->cursor)) {
+        case '&':
+          tok = (Token){TK_LAND, 2, source->cursor, 0};
+          break;
+        case '=':
+          tok = (Token){TK_ASGN_BAND, 2, source->cursor, 0};
+          break;
+        default:
+          tok = (Token){TK_BAND, 1, source->cursor, 0};
+          break;
+      }
+      break;
+    case '|':
+      switch (NEXT(source->cursor)) {
+        case '|':
+          tok = (Token){TK_LOR, 2, source->cursor, 0};
+          break;
+        case '=':
+          tok = (Token){TK_ASGN_BOR, 2, source->cursor, 0};
+          break;
+        default:
+          tok = (Token){TK_BOR, 1, source->cursor, 0};
+          break;
+      }
+      break;
+    case '>':
+      switch (NEXT(source->cursor)) {
+        case '>':
+          tok = (NEXT2(source->cursor) == '=')
+            ? (Token){TK_ASGN_BRSHIFT, 3, source->cursor, 0}
+            : (Token){TK_BRSHIFT, 2, source->cursor, 0};
+          break;
+        case '=':
+          tok = (Token){TK_GTE, 2, source->cursor, 0};
+          break;
+        default:
+          tok = (Token){TK_GT, 1, source->cursor, 0};
+          break;
+      }
+      break;
+    case '<':
+      switch (NEXT(source->cursor)) {
+        case '<':
+          tok = (NEXT2(source->cursor) == '=')
+            ? (Token){TK_ASGN_BLSHIFT, 3, source->cursor, 0}
+            : (Token){TK_BLSHIFT, 2, source->cursor, 0};
+          break;
+        case '=':
+          tok = (Token){TK_LTE, 2, source->cursor, 0};
+          break;
+        default:
+          tok = (Token){TK_LT, 1, source->cursor, 0};
+          break;
+      }
+      break;
+    case '*':
+      tok = (NEXT(source->cursor) == '=')
+        ? (Token){TK_ASGN_MUL, 2, source->cursor, 0}
+        : (Token){TK_MUL, 1, source->cursor, 0};
+      break;
+    case '/':
+      tok = (NEXT(source->cursor) == '=')
+        ? (Token){TK_ASGN_DIV, 2, source->cursor, 0}
+        : (Token){TK_DIV, 1, source->cursor, 0};
+      break;
+    case '%':
+      tok = (NEXT(source->cursor) == '=')
+        ? (Token){TK_ASGN_MOD, 2, source->cursor, 0}
+        : (Token){TK_MOD, 1, source->cursor, 0};
+      break;
+    case '!':
+      tok = (NEXT(source->cursor) == '=')
+        ? (Token){TK_NE, 2, source->cursor, 0}
+        : (Token){TK_BNOT, 1, source->cursor, 0};
+      break;
+    case '^':
+      tok = (NEXT(source->cursor) == '=')
+        ? (Token){TK_ASGN_BXOR, 2, source->cursor, 0}
+        : (Token){TK_BXOR, 1, source->cursor, 0};
+      break;
+    case '=':
+      tok = (NEXT(source->cursor) == '=')
+        ? (Token){TK_EQ, 2, source->cursor, 0}
+        : (Token){TK_ASSIGN, 1, source->cursor, 0};
+      break;
+    case '~': tok = (Token){TK_BNOT, 1, source->cursor, 0}; break;
+    case ';': tok = (Token){TK_SEMICOLON, 1, source->cursor, 0}; break;
+    case ':': tok = (Token){TK_COLON, 1, source->cursor, 0}; break;
+    case ',': tok = (Token){TK_COMMA, 1, source->cursor, 0}; break;
+    case '(': tok = (Token){TK_LPAREN, 1, source->cursor, 0}; break;
+    case ')': tok = (Token){TK_RPAREN, 1, source->cursor, 0}; break;
+    case '[': tok = (Token){TK_LBRACKET, 1, source->cursor, 0}; break;
+    case ']': tok = (Token){TK_RBRACKET, 1, source->cursor, 0}; break;
+    case '{': tok = (Token){TK_LBRACE, 1, source->cursor, 0}; break;
+    case '}': tok = (Token){TK_RBRACE, 1, source->cursor, 0}; break;
+    case '.': tok = (Token){TK_DOT, 1, source->cursor, 0}; break;
+    case '?': tok = (Token){TK_QUESTION, 1, source->cursor, 0}; break;
+    default: return 0;
+  }
+  source->cursor += tok.length;
+  return token_create(tok.kind, tok.loc, tok.length, tok.value);
+}
+
 Token* lexer_get(Lexer* lexer) {
   Source* source;
   if (lexer && list_length(lexer->sources) > 0) {
@@ -158,21 +299,22 @@ Token* lexer_get(Lexer* lexer) {
       if (IS_WIDECHARCONST(*source->cursor, NEXT(source->cursor)))
         return lexer_widecharconst(source);
 
-      // tokenize character constants
-      if (IS_CHARCONST(*source->cursor))
-        return lexer_charconst(source);
-
       if (IS_WIDESTRCONST(*source->cursor, NEXT(source->cursor)))
         return lexer_widestrconst(source);
 
-      // tokenize character constants
+      if (IS_CHARCONST(*source->cursor))
+        return lexer_charconst(source);
+
       if (IS_STRCONST(*source->cursor))
         return lexer_strconst(source);
 
-      if (*source->cursor == '#') {
-        // handle preprocessor directive here
-      }
+      // handle preprocessor directive here
+      if (*source->cursor == '#') {}
 
+      // tokenize operators and separators
+      Token* tok = lexer_opsep(source);
+      if (tok)
+        return tok;
     } else
       return token_create(TK_EOF, source->cursor, 0, 0);
   }

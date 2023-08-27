@@ -31,7 +31,7 @@ struct token {
     // logical
     TK_LAND,
     TK_LOR,
-    TL_LNOT,
+    TK_LNOT,
 
     // bitwise
     TK_BNOT,
@@ -58,7 +58,6 @@ struct token {
     TK_SEMICOLON,
     TK_COLON,
     TK_COMMA,
-    TK_STAR,
     // ()
     TK_LPAREN,
     TK_RPAREN,
@@ -74,11 +73,8 @@ struct token {
     TK_ARROW,
 
     // unary operators
-    TK_UADD,
-    TK_USUB,
     TK_INC,
     TK_DEC,
-    TK_ADDR,
 
     // ternary
     TK_QUESTION,
