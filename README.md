@@ -8,6 +8,10 @@ compiler, please view the [documentation](/docs). If you would like to
 contribute to the project, please view the [contributing](/CONTRIBUTING.MD)
 document before submitting a pull request.
 
+The eventual goal of this project is to be capable of compiling itself
+(self-hosting) as well as large scale and relevant code bases such as
+[sqlite](https://github.com/sqlite/sqlite) and [lua](https://github.com/lua/lua). 
+
 ## Status
 
 Current status of the project. Update once we have a fully working skeleton
