@@ -11,7 +11,6 @@ document before submitting a pull request.
 The eventual goal of this project is to be capable of compiling itself
 (self-hosting) as well as large scale and relevant code bases such as
 [sqlite](https://github.com/sqlite/sqlite) and [lua](https://github.com/lua/lua).
-
 This is a personal project of mine, which in large part implies the fact that
 it isnt nearly as robust or mature as a decently capable compiler would be. Keep
 in mind that this project is likely riddled with bugs en masse.
