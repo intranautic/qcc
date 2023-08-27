@@ -84,7 +84,7 @@ int list_fpush(List** list, void* value) {
 void* list_fpop(List** list) {
   List* tmp;
   void* value;
-  if (list) {
+  if (list && *list) {
     tmp = *list;
     *list = (*list)->next;
     value = tmp->value;

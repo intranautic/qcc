@@ -2,8 +2,9 @@
 
 #include "qcc/lexer.h"
 #include "qcc/logger.h"
-
 #include "qcc/keyword.h"
+
+#include "qcc/preprocess.h"
 
 #define NEXT(ptr) (*(ptr + 1))
 #define NEXT2(ptr) (*(ptr + 2))
@@ -19,39 +20,6 @@
 #define IS_WIDESTRCONST(c1, c2) \
   (IS_WIDE(c1) && c2 == '\"')
 
-
-Lexer* lexer_create(List* sources) {
-  Lexer* lexer = malloc(sizeof(Lexer));
-  lexer->sources = sources;
-
-  lexer->keywords = hashmap_create();
-  for (int i = 0; i < KWRD_END; ++i) {
-    hashmap_insert(lexer->keywords, &(Entry) {
-      .key = kwrd_map[i]->str,
-      .value = (void *)kwrd_map[i]
-    });
-  }
-  // TODO: implement incremental preprocessor
-  lexer->macros = hashmap_create();
-  // load pre defined macro map
-  lexer->cache = NULL;
-  return lexer;
-}
-
-void lexer_destroy(Lexer* lexer) {
-  if (lexer) {
-    // lexer->sources passed as pointer, dont dealloc
-    hashmap_destroy(lexer->keywords);
-    hashmap_destroy(lexer->macros);
-    list_destroy(lexer->cache);
-    free(lexer);
-  }
-  return;
-}
-
-//TODO:
-/* incremental preprocessor handled during lexing phase */
-static int lexer_preprocess(Lexer* lexer) {}
 
 static Token* lexer_identifier(Source* source) {
   char* origin = source->cursor;
@@ -278,7 +246,7 @@ static Token* lexer_internal(Lexer* lexer) {
 
     // handle preprocessor directive here
     while (*source->cursor == '#') {
-      lexer_preprocess(lexer);
+      preprocess_directive(lexer);
       source = (Source *)lexer->sources->value;
       lexer_skip(source);
     }
@@ -327,6 +295,45 @@ static Token* lexer_internal(Lexer* lexer) {
   return token_create(TK_EOF, source->cursor, 0, 0);
 }
 
+/* --- public lexer api --- */
+Lexer* lexer_create(void) {
+  Lexer* lexer = malloc(sizeof(Lexer));
+  lexer->sources = NULL;
+  lexer->keywords = hashmap_create();
+  for (int i = 0; i < KWRD_END; ++i) {
+    hashmap_insert(lexer->keywords, &(Entry) {
+      .key = kwrd_map[i]->str,
+      .value = (void *)kwrd_map[i]
+    });
+  }
+  // TODO: implement incremental preprocessor
+  lexer->macros = hashmap_create();
+  // load pre defined macro map
+  lexer->expand = NULL;
+  return lexer;
+}
+
+void lexer_destroy(Lexer* lexer) {
+  if (lexer) {
+    // lexer->sources passed as pointer, dont dealloc
+    hashmap_destroy(lexer->keywords);
+    hashmap_destroy(lexer->macros);
+    list_destroy(lexer->expand);
+    free(lexer);
+  }
+  return;
+}
+
+int lexer_register(Lexer* lexer, const char* path) {
+  if (!lexer->sources) {
+    Source* source = source_create(path);
+    if (source)
+      return list_fpush(&lexer->sources, source);
+  } else
+    logger_warning("Only one translation unit can be registered at a time\n");
+  return -1;
+}
+
 Token* lexer_get(Lexer* lexer) {
   if (lexer && list_length(lexer->sources) > 0) {
     Source* source = (Source *)lexer->sources->value;
@@ -335,8 +342,9 @@ Token* lexer_get(Lexer* lexer) {
 
     Token* tok = lexer_internal(lexer);
     if (tok->kind == TK_EOF) {
-      source_destroy(source);
-      list_fpop(&lexer->sources);
+      source_destroy(
+        list_fpop(&lexer->sources)
+      );
     }
     return tok;
   }

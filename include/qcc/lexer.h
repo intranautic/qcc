@@ -14,12 +14,15 @@ struct lexer {
   List* sources;
   Hashmap* keywords;
   Hashmap* macros;
-  List* cache;
+  List* expand;
 };
 
 /* constructor/destructor methods for lexer */
-Lexer* lexer_create(List* sources);
+Lexer* lexer_create(void);
 void lexer_destroy(Lexer* lexer);
+
+/* register source for lexer */
+int lexer_register(Lexer* lexer, const char* path);
 
 /* return a token and move up pointer */
 Token* lexer_get(Lexer* lexer);
