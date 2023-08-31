@@ -24,6 +24,8 @@ void* list_fpop(List** list);
 int list_push(List* list, void* value);
 void* list_pop(List* list, void* value);
 
+/* retrieve top of list */
+void* list_top(List* list);
 /* retrieve the length of the list */
 int list_length(List* list);
 #endif // LIST_H_

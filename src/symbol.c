@@ -2,23 +2,92 @@
 #include <stdbool.h>
 
 #include "qcc/symbol.h"
-#include "qcc/token.h"
-#include "qcc/type.h"
-#include "qcc/hashmap.h"
-#include "qcc/list.h"
+#include "qcc/initalloc.h"
 
-struct symbol {
-  Token* ident;
-  Scope* scope;
-  Type* type;
-};
+static Scope* scope_create(Scope* upref) {
+  Scope* scope = (Scope *)malloc(sizeof(Scope));
+  scope->lookup = hashmap_create();
+  scope->upref = upref;
+  scope->subscope = NULL;
+  return scope;
+}
 
-struct scope {
-  int size; // if empty dont perform lookup
-  bool is_leave; // if set allocate new scope from parent
-  Hashmap* lookup;
-  Scope* parent;
-  List* succ;
-};
+// deallocates all children scopes as well
+static void scope_destroy(Scope* scope) {
+  if (!scope)
+    return;
 
+  while (Scope* tmp = list_fpop(&scope->subscope))
+    scope_destroy(tmp);
 
+  hashmap_destroy(scope->lookup);
+  free(scope);
+  return;
+}
+
+/* --- public symbol table api --- */
+Symtab* symtab_create(void) {
+  Symtab* table = (Symtab *)malloc(sizeof(Symtab));
+  table->tag = scope_create(NULL);
+  table->current = table->global = scope_create(NULL);
+  return table;
+}
+
+void symtab_destroy(Symtab* table) {
+  if (table) {
+    scope_destroy(table->tag);
+    scope_destroy(table->global);
+    free(table);
+  }
+  return;
+}
+
+void symtab_enter(Symtab* table) {
+  if (table) {
+    list_fpush(
+      &table->current->subscope,
+      scope_create(table->current)
+    );
+    table->current = (Scope *)list_top(table->current->subscope);
+  }
+  return;
+}
+
+void symtab_leave(Symtab* table) {
+  if (table)
+    table->current = table->current->upref;
+  return;
+}
+
+int symtab_install(Symtab* table, Symbol* symbol) {
+  if (!table || !symbol)
+    return -1;
+
+  return hashmap_insert(
+    table->current->lookup,
+    &(Entry) {
+      .key = (const char *)symbol->ident->value,
+      .value = symbol
+    }
+  );
+}
+
+int symtab_remove(Symtab* table, Symbol* symbol) {
+  if (!table || !symbol)
+    return -1;
+
+  return hashmap_remove(
+    table->current->lookup,
+    (const char *)symbol->ident->value
+  );
+}
+
+Symbol* scope_lookup(Scope* scope, Token* ident) {
+  if (!scope)
+    return NULL;
+
+  Entry* result = hashmap_retrieve(scope->lookup, (const char *)ident->value);
+  return (result)
+    ? (Symbol *)result->value
+    : scope_lookup(scope->upref, ident);
+}

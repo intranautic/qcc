@@ -1,7 +1,6 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
-
 #define TOKEN_DEBUG(tok) \
   "token {\n\tkind: %s\n\tlength: %d\n\tlocation: %p\n\tvalue: %lx\n}\n", \
   token_tostring(tok->kind), tok->length, tok->loc, tok->value
@@ -9,91 +8,91 @@
 typedef struct token Token;
 struct token {
   enum {
-    TK_IDENTIFIER = 1,
-    TK_KEYWORD,
+    TOKEN_IDENTIFIER = 1,
+    TOKEN_KEYWORD,
 
     // literals
-    TK_LCHAR,
-    TK_LSTRING,
-    TK_LINTEGER,
-    TK_LFLOAT,
+    TOKEN_LCHAR,
+    TOKEN_LSTRING,
+    TOKEN_LINTEGER,
+    TOKEN_LFLOAT,
 
     // binary operators
-    TK_ADD,
-    TK_SUB,
-    TK_MUL,
-    TK_DIV,
-    TK_MOD,
+    TOKEN_ADD,
+    TOKEN_SUB,
+    TOKEN_MUL,
+    TOKEN_DIV,
+    TOKEN_MOD,
 
     // comparison
-    TK_EQ,
-    TK_NE,
-    TK_GT,
-    TK_LT,
-    TK_GTE,
-    TK_LTE,
+    TOKEN_EQ,
+    TOKEN_NE,
+    TOKEN_GT,
+    TOKEN_LT,
+    TOKEN_GTE,
+    TOKEN_LTE,
 
     // logical
-    TK_LAND,
-    TK_LOR,
-    TK_LNOT,
+    TOKEN_LAND,
+    TOKEN_LOR,
+    TOKEN_LNOT,
 
     // bitwise
-    TK_BNOT,
-    TK_BAND,
-    TK_BOR,
-    TK_BXOR,
-    TK_BLSHIFT,
-    TK_BRSHIFT,
+    TOKEN_BNOT,
+    TOKEN_BAND,
+    TOKEN_BOR,
+    TOKEN_BXOR,
+    TOKEN_BLSHIFT,
+    TOKEN_BRSHIFT,
 
     // assignment
-    TK_ASSIGN,
-    TK_ASGN_ADD,
-    TK_ASGN_SUB,
-    TK_ASGN_MUL,
-    TK_ASGN_DIV,
-    TK_ASGN_MOD,
-    TK_ASGN_BAND,
-    TK_ASGN_BOR,
-    TK_ASGN_BXOR,
-    TK_ASGN_BLSHIFT,
-    TK_ASGN_BRSHIFT,
+    TOKEN_ASSIGN,
+    TOKEN_ASGN_ADD,
+    TOKEN_ASGN_SUB,
+    TOKEN_ASGN_MUL,
+    TOKEN_ASGN_DIV,
+    TOKEN_ASGN_MOD,
+    TOKEN_ASGN_BAND,
+    TOKEN_ASGN_BOR,
+    TOKEN_ASGN_BXOR,
+    TOKEN_ASGN_BLSHIFT,
+    TOKEN_ASGN_BRSHIFT,
 
     // punctuators
-    TK_SEMICOLON,
-    TK_COLON,
-    TK_COMMA,
+    TOKEN_SEMICOLON,
+    TOKEN_COLON,
+    TOKEN_COMMA,
     // ()
-    TK_LPAREN,
-    TK_RPAREN,
+    TOKEN_LPAREN,
+    TOKEN_RPAREN,
     // []
-    TK_LBRACKET,
-    TK_RBRACKET,
+    TOKEN_LBRACKET,
+    TOKEN_RBRACKET,
     // {}
-    TK_LBRACE,
-    TK_RBRACE,
+    TOKEN_LBRACE,
+    TOKEN_RBRACE,
 
     // member
-    TK_DOT,
-    TK_ARROW,
+    TOKEN_DOT,
+    TOKEN_ARROW,
 
     // unary operators
-    TK_INC,
-    TK_DEC,
+    TOKEN_INC,
+    TOKEN_DEC,
 
     // ternary
-    TK_QUESTION,
+    TOKEN_QUESTION,
 
     // preprocessor
-    TK_DIRECTIVE,
-    TK_MACRO,
-    TK_BACKSLASH,
-    TK_PPNUMBER,
-    TK_PPCHAR,
-    TK_PPSTRING,
+    TOKEN_DIRECTIVE,
+    TOKEN_MACRO,
+    TOKEN_BACKSLASH,
+    TOKEN_PPNUMBER,
+    TOKEN_PPCHAR,
+    TOKEN_PPSTRING,
 
-    TK_EOF,
-    TK_NONE = 0
+    TOKEN_EOF,
+    TOKEN_NONE = 0
   } kind;
   int length;
   char* loc;

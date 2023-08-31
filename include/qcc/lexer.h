@@ -11,10 +11,10 @@
 
 typedef struct lexer Lexer;
 struct lexer {
-  List* sources;
   Hashmap* keywords;
   Hashmap* macros;
   List* expand;
+  List* sources;
 };
 
 /* constructor/destructor methods for lexer */

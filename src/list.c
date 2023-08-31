@@ -121,6 +121,11 @@ void* list_pop(List* list, void* value) {
   return (void *)-1;
 }
 
+void* list_top(List* list) {
+  if (list)
+    return list->value;
+}
+
 int list_length(List* list) {
   List* tmp;
   if (list) {

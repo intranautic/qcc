@@ -5,7 +5,6 @@ int main(int argc, const char** argv) {
   logger_init();
   logger_register("default", LOG_INFO, stderr);
 
-  // one round per translation unit, realloc and dealloc each time
   for (int i = 1; i < argc; ++i) {
     Lexer* lexer = lexer_create();
     if (lexer_register(lexer, argv[i]) != -1)

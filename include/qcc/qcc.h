@@ -9,4 +9,9 @@
 #include "qcc/token.h"
 #include "qcc/lexer.h"
 
+#include "qcc/symbol.h"
+#include "qcc/type.h"
+#include "qcc/ast.h"
+#include "qcc/parser.h"
+
 #endif // QCC_H_
