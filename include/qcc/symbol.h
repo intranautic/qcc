@@ -7,6 +7,8 @@
 #include "qcc/list.h"
 
 typedef struct symbol Symbol;
+typedef struct scope Scope;
+typedef struct symtab Symtab;
 struct symbol {
   enum {
     STORE_TYPEDEF,
@@ -20,7 +22,6 @@ struct symbol {
   Scope* scope;
 };
 
-typedef struct scope Scope;
 struct scope {
   Hashmap* lookup;
   Scope* upref;
@@ -28,7 +29,6 @@ struct scope {
   List* subscope;
 };
 
-typedef struct symtab Symtab;
 struct symtab {
   // struct/union/enum tag or file scope
   Scope* tag;

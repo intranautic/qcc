@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 
-#include "qcc/symbol.h"
 #include "qcc/list.h"
 #include "qcc/token.h"
 

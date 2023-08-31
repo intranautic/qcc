@@ -17,8 +17,12 @@ static void scope_destroy(Scope* scope) {
   if (!scope)
     return;
 
-  while (Scope* tmp = list_fpop(&scope->subscope))
-    scope_destroy(tmp);
+  Scope* tmp=0;
+  while (tmp = list_fpop(&scope->subscope)) {
+    if (tmp == (Scope *)-1)
+      break;
+    scope_destroy(tmp); 
+  }
 
   hashmap_destroy(scope->lookup);
   free(scope);
