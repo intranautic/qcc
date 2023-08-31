@@ -5,12 +5,6 @@ int main(int argc, const char** argv) {
   logger_init();
   logger_register("default", LOG_INFO, stderr);
 
-  Symtab* table = symtab_create();
-  symtab_enter(table);
-  symtab_leave(table);
-  symtab_enter(table);
-  symtab_destroy(table);
-  /*
   for (int i = 1; i < argc; ++i) {
     Lexer* lexer = lexer_create();
     if (lexer_register(lexer, argv[i]) != -1)
@@ -24,7 +18,6 @@ int main(int argc, const char** argv) {
     }
     lexer_destroy(lexer);
   }
-  */
 
   logger_destroy();
   return 0;

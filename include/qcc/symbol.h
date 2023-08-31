@@ -25,7 +25,6 @@ struct symbol {
 struct scope {
   Hashmap* lookup;
   Scope* upref;
-  // nested scopes
   List* subscope;
 };
 

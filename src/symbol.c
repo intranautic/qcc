@@ -29,6 +29,22 @@ static void scope_destroy(Scope* scope) {
   return;
 }
 
+/* --- public symbol object api --- */
+Symbol* symbol_create(int store, Type* type, Token* ident) {
+  Symbol* symbol = (Symbol *)malloc(sizeof(Symbol));
+  symbol->storage = store;
+  symbol->type = type;
+  symbol->ident = ident;
+  // assigned scope when installed into symbol table
+  symbol->scope = NULL;
+}
+
+void symbol_destroy(Symbol* symbol) {
+  if (symbol)
+    free(symbol);
+  return;
+}
+
 /* --- public symbol table api --- */
 Symtab* symtab_create(void) {
   Symtab* table = (Symtab *)malloc(sizeof(Symtab));
@@ -67,6 +83,7 @@ int symtab_install(Symtab* table, Symbol* symbol) {
   if (!table || !symbol)
     return -1;
 
+  symbol->scope = table->current;
   return hashmap_insert(
     table->current->lookup,
     &(Entry) {
@@ -86,6 +103,7 @@ int symtab_remove(Symtab* table, Symbol* symbol) {
   );
 }
 
+/* lookup an identifier from a given scope */
 Symbol* scope_lookup(Scope* scope, Token* ident) {
   if (!scope)
     return NULL;
@@ -95,3 +113,4 @@ Symbol* scope_lookup(Scope* scope, Token* ident) {
     ? (Symbol *)result->value
     : scope_lookup(scope->upref, ident);
 }
+
