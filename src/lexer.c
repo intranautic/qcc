@@ -1,19 +1,25 @@
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "qcc/lexer.h"
 #include "qcc/logger.h"
 #include "qcc/keyword.h"
-
 #include "qcc/unicode.h"
-
 #include "qcc/preprocess.h"
 
-#define NEXT(ptr) (*((ptr) + 1))
-#define IS_NUMERIC(c) ('0' <= c && c <= '9')
-#define IS_ALPHA(c) (('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z'))
-#define IS_IDENT0(c) (IS_ALPHA(c) || c == '_')
-#define IS_IDENT1(c) (IS_ALPHA(c) || c == '_' || IS_NUMERIC(c))
+#include "qcc/initalloc.h"
 
+#define NEXT(ptr) (*((ptr) + 1))
+#define IS_NUMCONST(ptr) \
+  (isdigit(*ptr) || (*ptr == '.' && isdigit(NEXT(ptr))))
+#define IS_IDENT0(c) (isalpha(c) || c == '_')
+#define IS_IDENT1(c) (isalpha(c) || c == '_' || isdigit(c))
+#define IS_E(c) (c == 'e' || c == 'E')
+#define SUFFIX_U(c) (c == 'u' || c == 'U')
+#define SUFFIX_F(c) (c == 'f' || c == 'F')
+#define SUFFIX_L(c) (c == 'l' || c == 'L')
+#define SUFFIX_LL(ptr) (SUFFIX_L(*ptr) && SUFFIX_L(NEXT(ptr)))
 
 static int handle_ignore(Source* source) {
   while (*source->cursor) {
@@ -213,56 +219,121 @@ static Token* lexer_opsep(Source* source) {
     default: return 0;
   }
   source->cursor += tok.length;
-  return token_create(tok.kind, tok.loc, tok.length, tok.value);
+  return token_create(tok.kind, tok.loc, tok.length);
 }
 
 static Token* lexer_identifier(Source* source) {
   char* origin = source->cursor;
-  while (IS_IDENT1(*source->cursor))
-    source->cursor++;
+  for (origin = source->cursor; IS_IDENT1(*source->cursor); source->cursor++);
 
-  return token_create(TOKEN_IDENTIFIER,
+  return INIT_ALLOC(Token, {
+    .kind = TOKEN_IDENTIFIER,
+    .length = source->cursor-origin,
+    .loc = origin,
+    .value.identifier = strndup(origin, source->cursor-origin)
+  });
+
+  return token_create(
+      TOKEN_IDENTIFIER,
       origin,
-      (++source->cursor-origin) - 1,
-      0
+      (++source->cursor-origin) - 1
     );
 }
 
 static Token* lexer_charconst(Source* source, encoding_t encoding) {}
 static Token* lexer_strconst(Source* source, encoding_t encoding) {}
 
-static Token* lexer_hexintconst(Source* source) {}
-static Token* lexer_octintconst(Source* source) {}
+void lexer_suffix(Source* source) {
+  switch (*source->cursor) {
+    case 'u':
+    case 'U':
+      source->cursor++;
+      if (SUFFIX_L(*source->cursor)) source->cursor++;
+      else if (SUFFIX_LL(source->cursor)) source->cursor += 2;
+      break;
+    case 'l':
+    case 'L':
+      source->cursor += (SUFFIX_LL(source->cursor)) ? 2 : 1;
+      if (SUFFIX_U(*source->cursor))
+        source->cursor++;
+    case 'f':
+    case 'F':
+      source->cursor++;
+    default: break;
+  }
+  return;
+}
 
 static Token* lexer_numconst(Source* source) {
-  // base prefix
-  int base = 10;
+  long value;
+  char* origin = source->cursor;
+
   if (*source->cursor == '0') {
-    // hexadecimal [0-9a-f]
-    if (NEXT(source->cursor) == 'x' || NEXT(source->cursor) == 'X')
-      return lexer_hexintconst(source);
-    // octal [0-7]
-    if (IS_NUMERIC(NEXT(source->cursor)))
-      return lexer_octintconst(source);
+    // hexadecimal
+    // TODO: handle 'e' in hexadecimal float
+    if (NEXT(source->cursor) == 'x' || NEXT(source->cursor) == 'X') {
+      value = strtol(origin, &source->cursor, 16);
+      return INIT_ALLOC(Token, {
+        .kind = TOKEN_LINTEGER,
+        .length = source->cursor - origin,
+        .loc = origin,
+        .value.iliteral = value
+      });
+    }
+    // octal
+    if (isalpha(NEXT(source->cursor))) {
+      value = strtol(origin, &source->cursor, 8);
+      return INIT_ALLOC(Token, {
+        .kind = TOKEN_LINTEGER,
+        .length = source->cursor - origin,
+        .loc = origin,
+        .value.iliteral = value
+      });
+    }
   }
+
+  // float
+  for (char* tmp=origin; *tmp != 0; tmp++) {
+    if (!isdigit(*tmp))
+      break;
+
+    if (*tmp == '.' || IS_E(*tmp) || SUFFIX_F(NEXT(tmp))) {
+      double value = strtod(origin, &source->cursor);
+      return INIT_ALLOC(Token, {
+        .kind = TOKEN_LFLOAT,
+        .length = source->cursor - origin,
+        .loc = origin,
+        .value.fliteral = value
+      });
+    }
+  } 
+  // integer
+  value = strtol(origin, &source->cursor, 10);
+  return INIT_ALLOC(Token, {
+    .kind = TOKEN_LINTEGER,
+    .length = source->cursor - origin,
+    .loc = origin,
+    .value.iliteral = value
+  });
+
 }
 
 static Token* lexer_internal(Lexer* lexer) {
-  Source* source = (Source *)lexer->sources->value;
+  Source* source = (Source *)list_top(lexer->sources);
   if (*source->cursor) {
     lexer_skip(source);
 
     // handle preprocessor directive here
     while (*source->cursor == '#') {
       preprocess_directive(lexer);
-      source = (Source *)lexer->sources->value;
+      source = (Source *)list_top(lexer->sources);
       lexer_skip(source);
     }
 
     // TODO: tokenize str/char const & wide unicode
 
     // tokenize numeric constants
-    if (IS_NUMERIC(*source->cursor))
+    if (IS_NUMCONST(source->cursor))
       return lexer_numconst(source);
 
     // tokenize identifiers or keywords
@@ -275,11 +346,12 @@ static Token* lexer_internal(Lexer* lexer) {
 
       // if identifier is a keyword, return keyword token instead
       Entry* kwrd_entry =
-        hashmap_nretrieve(lexer->keywords, tok->loc, tok->length);
+        hashmap_retrieve(lexer->keywords, tok->value.identifier);
 
       if (kwrd_entry) {
+        free(tok->value.identifier);
         tok->kind = TOKEN_KEYWORD;
-        tok->value = (Keyword *)kwrd_entry->value;
+        tok->value.keyword = (Keyword *)kwrd_entry->value;
       }
       return tok;
     }
@@ -289,7 +361,7 @@ static Token* lexer_internal(Lexer* lexer) {
     if (tok)
       return tok;
   }
-  return token_create(TOKEN_EOF, source->cursor, 0, 0);
+  return token_create(TOKEN_EOF, source->cursor, 0);
 }
 
 /* --- public lexer api --- */
@@ -332,7 +404,7 @@ int lexer_register(Lexer* lexer, const char* path) {
 
 Token* lexer_get(Lexer* lexer) {
   if (lexer && list_length(lexer->sources) > 0) {
-    Source* source = (Source *)lexer->sources->value;
+    Source* source = (Source *)list_top(lexer->sources);
     if (!source->is_ready)
       source_fill(source);
 
@@ -350,7 +422,7 @@ Token* lexer_get(Lexer* lexer) {
 Token* lexer_peek(Lexer* lexer) {
   Token* tok;
   if (tok = lexer_get(lexer)) {
-    Source* source = (Source *)lexer->sources->value;
+    Source* source = (Source *)list_top(lexer->sources);
     source->cursor -= tok->length;
     return tok;
   }

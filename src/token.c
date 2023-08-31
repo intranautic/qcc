@@ -3,18 +3,26 @@
 
 #include "qcc/token.h"
 
-Token* token_create(int kind, char* loc, int length, void* value) {
+Token* token_create(int kind, char* loc, int length) {
   Token* token = malloc(sizeof(Token));
   token->kind = kind;
   token->loc = loc;
   token->length = length;
-  token->value = value;
+  // init to null
+  token->value.iliteral = 0;
   return token;
 }
 
 void token_destroy(Token* token) {
-  if (token)
+  if (token) {
+    switch (token->kind) {
+      case TOKEN_IDENTIFIER:
+        free(token->value.identifier);
+        break;
+      default: break;
+    }
     free(token);
+  }
   return;
 }
 
@@ -75,6 +83,7 @@ const char* token_tostring(int kind) {
     [TOKEN_INC] = "TOKEN_INC",
     [TOKEN_DEC] = "TOKEN_DEC",
     [TOKEN_QUESTION] = "TOKEN_QUESTION",
+    [TOKEN_ELLIPSIS] = "TOKEN_ELLIPSIS",
     [TOKEN_DIRECTIVE] = "TOKEN_DIRECTIVE",
     [TOKEN_MACRO] = "TOKEN_MACRO",
     [TOKEN_BACKSLASH] = "TOKEN_BACKSLASH",

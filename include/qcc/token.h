@@ -1,9 +1,11 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
+#include "qcc/keyword.h"
+
 #define TOKEN_DEBUG(tok) \
-  "token {\n\tkind: %s\n\tlength: %d\n\tlocation: %p\n\tvalue: %lx\n}\n", \
-  token_tostring(tok->kind), tok->length, tok->loc, tok->value
+  "token {\n\tkind: %s\n\tlength: %d\n\tlocation: %p\n\tvalue: %ld\n}\n", \
+  token_tostring(tok->kind), tok->length, tok->loc, tok->value.iliteral
 
 typedef struct token Token;
 struct token {
@@ -83,6 +85,9 @@ struct token {
     // ternary
     TOKEN_QUESTION,
 
+    // ellipsis
+    TOKEN_ELLIPSIS,
+
     // preprocessor
     TOKEN_DIRECTIVE,
     TOKEN_MACRO,
@@ -96,11 +101,16 @@ struct token {
   } kind;
   int length;
   char* loc;
-  void* value;
+  union {
+    long iliteral;
+    double fliteral;
+    char* identifier;
+    Keyword* keyword;
+  } value;
 };
 
 /* token constructor/destructor methods */
-Token* token_create(int kind, char* loc, int length, void* value);
+Token* token_create(int kind, char* loc, int length);
 void token_destroy(Token* token);
 
 /* debugging routines for token */
