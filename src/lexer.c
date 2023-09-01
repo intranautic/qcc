@@ -243,79 +243,72 @@ static Token* lexer_identifier(Source* source) {
 static Token* lexer_charconst(Source* source, encoding_t encoding) {}
 static Token* lexer_strconst(Source* source, encoding_t encoding) {}
 
-void lexer_suffix(Source* source) {
+static int lexer_isfloat(char* cursor, int base) {
+  char* end = cursor;
+  if (*cursor) {
+    if (*cursor == '.')
+      return true;
+
+    if (strtol(cursor, &end, base)) {
+      switch (*end) {
+        case '.':
+        case 'p':
+        case 'P':
+          return true;
+        default: break;
+      }
+    }
+  }
+  return false;
+}
+
+static Token* lexer_floatconst(Source* source) {
+  Token tok = {
+    .kind = TOKEN_LFLOAT,
+    .length = 0,
+    .loc = source->cursor,
+    .value.fliteral = 0
+  };
+
+  if (!(tok.value.fliteral = strtod(tok.loc, &source->cursor)))
+    return 0;
+
+  tok.length = source->cursor - tok.loc;
+  // handle suffix
   switch (*source->cursor) {
-    case 'u':
-    case 'U':
-      source->cursor++;
-      if (SUFFIX_L(*source->cursor)) source->cursor++;
-      else if (SUFFIX_LL(source->cursor)) source->cursor += 2;
-      break;
     case 'l':
     case 'L':
-      source->cursor += (SUFFIX_LL(source->cursor)) ? 2 : 1;
-      if (SUFFIX_U(*source->cursor))
-        source->cursor++;
     case 'f':
     case 'F':
       source->cursor++;
     default: break;
   }
-  return;
+  return token_construct(&tok);
 }
 
 static Token* lexer_numconst(Source* source) {
-  long value;
-  char* origin = source->cursor;
-
+  int base = 10;
   if (*source->cursor == '0') {
-    // hexadecimal
-    // TODO: handle 'e' in hexadecimal float
-    if (NEXT(source->cursor) == 'x' || NEXT(source->cursor) == 'X') {
-      value = strtol(origin, &source->cursor, 16);
-      return INIT_ALLOC(Token, {
-        .kind = TOKEN_LINTEGER,
-        .length = source->cursor - origin,
-        .loc = origin,
-        .value.iliteral = value
-      });
-    }
-    // octal
-    if (isalpha(NEXT(source->cursor))) {
-      value = strtol(origin, &source->cursor, 8);
-      return INIT_ALLOC(Token, {
-        .kind = TOKEN_LINTEGER,
-        .length = source->cursor - origin,
-        .loc = origin,
-        .value.iliteral = value
-      });
-    }
+    if (NEXT(source->cursor) == 'x' || NEXT(source->cursor) == 'X')
+      base = 16;
+    else if (isdigit(NEXT(source->cursor)))
+      base = 8;
   }
 
-  // float
-  for (char* tmp=origin; *tmp != 0; tmp++) {
-    if (!isdigit(*tmp))
-      break;
+  if (lexer_isfloat(source->cursor, base))
+    return lexer_floatconst(source);
 
-    if (*tmp == '.' || IS_E(*tmp) || SUFFIX_F(NEXT(tmp))) {
-      double value = strtod(origin, &source->cursor);
-      return INIT_ALLOC(Token, {
-        .kind = TOKEN_LFLOAT,
-        .length = source->cursor - origin,
-        .loc = origin,
-        .value.fliteral = value
-      });
-    }
-  } 
-  // integer
-  value = strtol(origin, &source->cursor, 10);
-  return INIT_ALLOC(Token, {
+  char* origin = source->cursor;
+  Token* tok = INIT_ALLOC(Token, {
     .kind = TOKEN_LINTEGER,
-    .length = source->cursor - origin,
-    .loc = origin,
-    .value.iliteral = value
+    .loc = source->cursor,
+    .value.iliteral = strtol(origin, &source->cursor, base)
   });
+  if (!tok->value.iliteral)
+    return 0;
 
+  tok->length = source->cursor - origin;
+  return tok;
 }
 
 static Token* lexer_internal(Lexer* lexer) {

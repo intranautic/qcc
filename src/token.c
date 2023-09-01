@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -10,6 +11,13 @@ Token* token_create(int kind, char* loc, int length) {
   token->length = length;
   // init to null
   token->value.iliteral = 0;
+  return token;
+}
+
+Token* token_construct(Token* token2) {
+  Token* token = malloc(sizeof(Token));
+  // shallow copy
+  *token = *token2;
   return token;
 }
 
@@ -95,3 +103,30 @@ const char* token_tostring(int kind) {
   };
   return tok_map[kind];
 }
+
+void token_dump(Token* token) {
+  printf("Token {\n\tkind: %s\n\tlength: %d\n\tlocation: %p\n\tvalue: ",
+    token_tostring(token->kind), token->length, token->loc);
+  switch (token->kind) {
+    case TOKEN_IDENTIFIER:
+      printf("%s\n", token->value.identifier);
+    case TOKEN_KEYWORD:
+      printf("%s\n", token->value.keyword->str);
+    case TOKEN_LCHAR:
+      printf("%c\n", token->value.cliteral);
+      break;
+    case TOKEN_LSTRING:
+      printf("%s\n", token->value.sliteral);
+      break;
+    case TOKEN_LINTEGER:
+      printf("%ld\n", token->value.iliteral);
+      break;
+    case TOKEN_LFLOAT:
+      printf("%lf\n", token->value.fliteral);
+      break;
+    default: puts("NONE"); break;
+  };
+  puts("}");
+  return;
+}
+

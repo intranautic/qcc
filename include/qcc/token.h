@@ -3,9 +3,6 @@
 
 #include "qcc/keyword.h"
 
-#define TOKEN_DEBUG(tok) \
-  "token {\n\tkind: %s\n\tlength: %d\n\tlocation: %p\n\tvalue: %ld\n}\n", \
-  token_tostring(tok->kind), tok->length, tok->loc, tok->value.iliteral
 
 typedef struct token Token;
 struct token {
@@ -102,6 +99,8 @@ struct token {
   int length;
   char* loc;
   union {
+    char cliteral;
+    char* sliteral;
     long iliteral;
     double fliteral;
     char* identifier;
@@ -111,12 +110,11 @@ struct token {
 
 /* token constructor/destructor methods */
 Token* token_create(int kind, char* loc, int length);
+Token* token_construct(Token* token);
 void token_destroy(Token* token);
 
 /* debugging routines for token */
 int token_compare(Token* token, const char* string);
 const char* token_tostring(int kind);
-#ifdef QCC_DEBUG
 void token_dump(Token* token);
-#endif // QCC_DEBUG
 #endif // TOKEN_H_

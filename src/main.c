@@ -13,7 +13,7 @@ int main(int argc, const char** argv) {
     logger_info("Starting tokenization loop\n");
     Token* tok;
     while (tok = lexer_get(lexer)) {
-      logger_info(TOKEN_DEBUG(tok));
+      token_dump(tok);
       token_destroy(tok);
     }
     lexer_destroy(lexer);
