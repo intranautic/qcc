@@ -74,6 +74,8 @@ static int lexer_skip(Source* source) {
   int delta = 0;
   handle_ignore(source);
   while (*source->cursor == '/') {
+    if (NEXT(source->cursor) != '*' || NEXT(source->cursor) != '/')
+      break;
     source->cursor++;
     delta = lexer_comment(source);
     if (delta == -1) {
