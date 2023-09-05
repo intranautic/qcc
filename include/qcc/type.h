@@ -23,41 +23,40 @@ struct field {
 
 struct type {
   enum {
-    TYPE_CHAR,
-    TYPE_SHORT,
-    TYPE_INTEGER,
-    TYPE_LONG,
-    TYPE_FLOAT,
-    TYPE_DOUBLE,
-    TYPE_LDOUBLE,
-    TYPE_ARRAY,
-    TYPE_STRUCT,
-    TYPE_UNION,
-    TYPE_ENUM,
-    TYPE_POINTER,
-    TYPE_FUNCTION,
+    TYPE_CHAR     = 1,
+    TYPE_SHORT    = 1 << 2,
+    TYPE_INTEGER  = 1 << 3,
+    TYPE_LONG     = 1 << 4,
+    TYPE_FLOAT    = 1 << 5,
+    TYPE_DOUBLE   = 1 << 6,
+    TYPE_LDOUBLE  = 1 << 7,
+    TYPE_ARRAY    = 1 << 8,
+    TYPE_STRUCT   = 1 << 9,
+    TYPE_UNION    = 1 << 10,
+    TYPE_ENUM     = 1 << 11,
+    TYPE_POINTER  = 1 << 12,
+    TYPE_FUNCTION = 1 << 13,
     TYPE_VOID
   } kind;
   int align;
   int size;
   bool sign;
   union {
-    // array type
     struct {
-      // type of array elements
-      int kind;
-      Type* next;
-    } type_array;
+      Type* array;
+      int length;
+    } ty_array;
 
     // function type
     struct {
       bool is_inline;
       bool is_local;
       bool is_variadic;
-      int stack;
+      int stacksz;
       List* params;
+      List* locals;
       Type* return_type;
-    } type_func;
+    } ty_func;
 
     // struct/union types
     struct {
@@ -65,18 +64,26 @@ struct type {
       bool is_flexible;
       bool is_anon;
       Field* fields;
-    } type_struct_or_union;
+    } ty_struct_or_union;
 
-    Type* type_pointer;
-    char type_char;
-    short type_short;
-    int type_int;
-    long type_long;
-    float type_float;
-    double type_double;
-    long double type_ldouble;
-    // value for enumeration, token holds identifier
-    int type_enum;
+    Type* ty_pointer;
+    char  ty_char;
+    short ty_short;
+    int   ty_int;
+    long  ty_long;
+    float ty_float;
+    double ty_double;
+    long double ty_ldouble;
+    int ty_enum;
   };
 };
+
+
+bool type_isinteger(Type* type);
+bool type_isfloat(Type* type);
+bool type_isnumeric(Type* type);
+Type* type_toptr(Type* type);
+Type* type_fromptr(Type* type);
+Type* type_array(Type* base, int length);
+
 #endif // TYPE_H_

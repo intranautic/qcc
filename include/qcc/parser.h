@@ -12,12 +12,11 @@
 typedef struct parser Parser;
 struct parser {
   Lexer* lexer;
-  Node* root;
+  Symtab* tabref;
 };
 
-//TODO:
-Parser* parser_create(void);
+Parser* parser_create(Lexer* lexer, Symtab* table);
 void parser_destroy(Parser* parser);
-
-Parser* parser_run(Parser* parser);
+/* execute parser */
+Node* parser_run(Parser* parser);
 #endif // PARSER_H_
