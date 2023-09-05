@@ -13,6 +13,8 @@
 #include "qcc/cfg.h"
 #include "qcc/ssa.h"
 
+#include "qcc/optimize.h"
+
 typedef struct unit Unit;
 struct unit {
   Config config;
