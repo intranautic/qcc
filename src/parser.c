@@ -59,7 +59,8 @@ static Node* parse_primary_expr(Parser* parser) {
       break;
     case TOKEN_LPAREN:
       node = parse_expr(parser);
-      if (lexer_kget(parser->lexer) != TOKEN_RPAREN)
+      tok = lexer_get(parser->lexer);
+      if (!tok || tok->kind != TOKEN_RPAREN)
         logger_fatal(-1, "Unclosed parenthesis on line %d\n", tok->line);
       break;
     default: return NULL;
@@ -94,6 +95,7 @@ static Node* parse_unary_expr(Parser* parser) {
   return node;
 }
 
+// TODO: change this into an operator prec parser, this doesnt have precedence rn :(
 // binary-expression:
 //   unary-expression { binary-operator unary-expression }
 // binary-operator:
@@ -101,7 +103,7 @@ static Node* parse_unary_expr(Parser* parser) {
 static Node* parse_binary_expr(Parser* parser) {
   Node* node = parse_unary_expr(parser);
   Token* tok;
-  if (tok = lexer_get(parser->lexer)) {
+  while (tok = lexer_peek(parser->lexer)) {
     switch (tok->kind) {
       case TOKEN_LOR:
       case TOKEN_LAND:
@@ -121,6 +123,7 @@ static Node* parse_binary_expr(Parser* parser) {
       case TOKEN_MUL:
       case TOKEN_DIV:
       case TOKEN_MOD:
+        lexer_eat(parser->lexer);
         node = INIT_ALLOC(Node, {
           .kind = EXPR_BINARY,
           .e.op = tok,
@@ -128,7 +131,7 @@ static Node* parse_binary_expr(Parser* parser) {
           .e.rhs = parse_unary_expr(parser)
         });
         break;
-      default: break;
+      default: return node;
     }
   }
   return node;
