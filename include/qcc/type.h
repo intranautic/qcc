@@ -7,6 +7,21 @@
 #include "qcc/token.h"
 
 typedef struct type Type;
+extern Type* pred_void;
+extern Type* pred_bool;
+extern Type* pred_enum;
+extern Type* pred_char;
+extern Type* pred_short;
+extern Type* pred_int;
+extern Type* pred_long;
+extern Type* pred_uchar;
+extern Type* pred_ushort;
+extern Type* pred_uint;
+extern Type* pred_ulong;
+extern Type* pred_float;
+extern Type* pred_double;
+extern Type* pred_ldouble;
+
 typedef struct field Field;
 struct field {
   Type* type;
@@ -36,14 +51,15 @@ struct type {
     TYPE_ENUM     = 1 << 11,
     TYPE_POINTER  = 1 << 12,
     TYPE_FUNCTION = 1 << 13,
-    TYPE_VOID
+    TYPE_VOID,
+    TYPE_BOOL
   } kind;
-  int align;
   int size;
+  int align;
   bool sign;
   union {
     struct {
-      Type* array;
+      Type* arrtype;
       int length;
     } ty_array;
 
@@ -67,23 +83,33 @@ struct type {
     } ty_struct_or_union;
 
     Type* ty_pointer;
-    char  ty_char;
-    short ty_short;
-    int   ty_int;
-    long  ty_long;
-    float ty_float;
-    double ty_double;
-    long double ty_ldouble;
-    int ty_enum;
   };
 };
 
+/* helper functions, check attributes of types */
+bool type_ischar(Type* type);
+bool type_isint(Type* type);
+bool type_isshort(Type* type);
+bool type_islong(Type* type);
+bool type_isunsign(Type* type);
+bool type_isnum(Type* type);
 
-bool type_isinteger(Type* type);
-bool type_isfloat(Type* type);
-bool type_isnumeric(Type* type);
-Type* type_toptr(Type* type);
-Type* type_fromptr(Type* type);
-Type* type_array(Type* base, int length);
+/* type constructor apis, build from predicates */
+Type* type_construct(int size, int align);
+/* reference and dereference type */
+Type* type_ptrto(Type* type);
+Type* type_ptrfrom(Type* type);
 
+/* aggregate type constructors */
+Type* type_array(Type* type, int length);
+Type* type_struct(void);
+
+/* function constructor */
+Type* type_func(void);
+
+/* type checking functionality, check if two types are compatible*/
+int type_iseq(Type* t1, Type* t2);
+
+/* type conversion for arithmetic, return common type */
+Type* type_common(Type* t1, Type* t2);
 #endif // TYPE_H_

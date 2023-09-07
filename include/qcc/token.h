@@ -98,6 +98,7 @@ struct token {
   } kind;
   int length;
   char* loc;
+  int line;
   union {
     char cliteral;
     char* sliteral;
@@ -109,7 +110,7 @@ struct token {
 };
 
 /* token constructor/destructor methods */
-Token* token_create(int kind, char* loc, int length);
+Token* token_create(int kind, char* loc, int line, int length);
 Token* token_construct(Token* token);
 void token_destroy(Token* token);
 

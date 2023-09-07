@@ -15,8 +15,9 @@ struct parser {
   Symtab* tabref;
 };
 
-Parser* parser_create(Lexer* lexer, Symtab* table);
+/* constructor/destructor methods for parser state */
+Parser* parser_create(Lexer* lexer, Symtab* tabref);
 void parser_destroy(Parser* parser);
-/* execute parser */
+/* api to run parser on given translation unit */
 Node* parser_run(Parser* parser);
 #endif // PARSER_H_

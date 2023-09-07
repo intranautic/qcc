@@ -94,55 +94,55 @@ static Token* lexer_opsep(Source* source) {
     case '+':
       switch (NEXT(source->cursor)) {
         case '+':
-          tok = (Token){TOKEN_INC, 2, source->cursor, 0};
+          tok = (Token){TOKEN_INC, 2, source->cursor, source->line, 0};
           break;
         case '=':
-          tok = (Token){TOKEN_ASGN_ADD, 2, source->cursor, 0};
+          tok = (Token){TOKEN_ASGN_ADD, 2, source->cursor, source->line, 0};
           break;
         default:
-          tok = (Token){TOKEN_ADD, 1, source->cursor, 0};
+          tok = (Token){TOKEN_ADD, 1, source->cursor, source->line, 0};
           break;
       }
       break;
     case '-':
       switch (NEXT(source->cursor)) {
         case '-':
-          tok = (Token){TOKEN_DEC, 2, source->cursor, 0};
+          tok = (Token){TOKEN_DEC, 2, source->cursor, source->line, 0};
           break;
         case '=':
-          tok = (Token){TOKEN_ASGN_SUB, 2, source->cursor, 0};
+          tok = (Token){TOKEN_ASGN_SUB, 2, source->cursor, source->line, 0};
           break;
         case '>':
-          tok = (Token){TOKEN_ARROW, 2, source->cursor, 0};
+          tok = (Token){TOKEN_ARROW, 2, source->cursor, source->line, 0};
           break;
         default:
-          tok = (Token){TOKEN_SUB, 1, source->cursor, 0};
+          tok = (Token){TOKEN_SUB, 1, source->cursor, source->line, 0};
           break;
       }
       break;
     case '&':
       switch (NEXT(source->cursor)) {
         case '&':
-          tok = (Token){TOKEN_LAND, 2, source->cursor, 0};
+          tok = (Token){TOKEN_LAND, 2, source->cursor, source->line, 0};
           break;
         case '=':
-          tok = (Token){TOKEN_ASGN_BAND, 2, source->cursor, 0};
+          tok = (Token){TOKEN_ASGN_BAND, 2, source->cursor, source->line, 0};
           break;
         default:
-          tok = (Token){TOKEN_BAND, 1, source->cursor, 0};
+          tok = (Token){TOKEN_BAND, 1, source->cursor, source->line, 0};
           break;
       }
       break;
     case '|':
       switch (NEXT(source->cursor)) {
         case '|':
-          tok = (Token){TOKEN_LOR, 2, source->cursor, 0};
+          tok = (Token){TOKEN_LOR, 2, source->cursor, source->line, 0};
           break;
         case '=':
-          tok = (Token){TOKEN_ASGN_BOR, 2, source->cursor, 0};
+          tok = (Token){TOKEN_ASGN_BOR, 2, source->cursor, source->line, 0};
           break;
         default:
-          tok = (Token){TOKEN_BOR, 1, source->cursor, 0};
+          tok = (Token){TOKEN_BOR, 1, source->cursor, source->line, 0};
           break;
       }
       break;
@@ -150,14 +150,14 @@ static Token* lexer_opsep(Source* source) {
       switch (NEXT(source->cursor)) {
         case '>':
           tok = (NEXT(source->cursor + 1) == '=')
-            ? (Token){TOKEN_ASGN_BRSHIFT, 3, source->cursor, 0}
-            : (Token){TOKEN_BRSHIFT, 2, source->cursor, 0};
+            ? (Token){TOKEN_ASGN_BRSHIFT, 3, source->cursor, source->line, 0}
+            : (Token){TOKEN_BRSHIFT, 2, source->cursor, source->line, 0};
           break;
         case '=':
-          tok = (Token){TOKEN_GTE, 2, source->cursor, 0};
+          tok = (Token){TOKEN_GTE, 2, source->cursor, source->line, 0};
           break;
         default:
-          tok = (Token){TOKEN_GT, 1, source->cursor, 0};
+          tok = (Token){TOKEN_GT, 1, source->cursor, source->line, 0};
           break;
       }
       break;
@@ -165,63 +165,87 @@ static Token* lexer_opsep(Source* source) {
       switch (NEXT(source->cursor)) {
         case '<':
           tok = (NEXT(source->cursor + 1) == '=')
-            ? (Token){TOKEN_ASGN_BLSHIFT, 3, source->cursor, 0}
-            : (Token){TOKEN_BLSHIFT, 2, source->cursor, 0};
+            ? (Token){TOKEN_ASGN_BLSHIFT, 3, source->cursor, source->line, 0}
+            : (Token){TOKEN_BLSHIFT, 2, source->cursor, source->line, 0};
           break;
         case '=':
-          tok = (Token){TOKEN_LTE, 2, source->cursor, 0};
+          tok = (Token){TOKEN_LTE, 2, source->cursor, source->line, 0};
           break;
         default:
-          tok = (Token){TOKEN_LT, 1, source->cursor, 0};
+          tok = (Token){TOKEN_LT, 1, source->cursor, source->line, 0};
           break;
       }
       break;
     case '*':
       tok = (NEXT(source->cursor) == '=')
-        ? (Token){TOKEN_ASGN_MUL, 2, source->cursor, 0}
-        : (Token){TOKEN_MUL, 1, source->cursor, 0};
+        ? (Token){TOKEN_ASGN_MUL, 2, source->cursor, source->line, 0}
+        : (Token){TOKEN_MUL, 1, source->cursor, source->line, 0};
       break;
     case '/':
       tok = (NEXT(source->cursor) == '=')
-        ? (Token){TOKEN_ASGN_DIV, 2, source->cursor, 0}
-        : (Token){TOKEN_DIV, 1, source->cursor, 0};
+        ? (Token){TOKEN_ASGN_DIV, 2, source->cursor, source->line, 0}
+        : (Token){TOKEN_DIV, 1, source->cursor, source->line, 0};
       break;
     case '%':
       tok = (NEXT(source->cursor) == '=')
-        ? (Token){TOKEN_ASGN_MOD, 2, source->cursor, 0}
-        : (Token){TOKEN_MOD, 1, source->cursor, 0};
+        ? (Token){TOKEN_ASGN_MOD, 2, source->cursor, source->line, 0}
+        : (Token){TOKEN_MOD, 1, source->cursor, source->line, 0};
       break;
     case '!':
       tok = (NEXT(source->cursor) == '=')
-        ? (Token){TOKEN_NE, 2, source->cursor, 0}
-        : (Token){TOKEN_BNOT, 1, source->cursor, 0};
+        ? (Token){TOKEN_NE, 2, source->cursor, source->line, 0}
+        : (Token){TOKEN_BNOT, 1, source->cursor, source->line, 0};
       break;
     case '^':
       tok = (NEXT(source->cursor) == '=')
-        ? (Token){TOKEN_ASGN_BXOR, 2, source->cursor, 0}
-        : (Token){TOKEN_BXOR, 1, source->cursor, 0};
+        ? (Token){TOKEN_ASGN_BXOR, 2, source->cursor, source->line, 0}
+        : (Token){TOKEN_BXOR, 1, source->cursor, source->line, 0};
       break;
     case '=':
       tok = (NEXT(source->cursor) == '=')
-        ? (Token){TOKEN_EQ, 2, source->cursor, 0}
-        : (Token){TOKEN_ASSIGN, 1, source->cursor, 0};
+        ? (Token){TOKEN_EQ, 2, source->cursor, source->line, 0}
+        : (Token){TOKEN_ASSIGN, 1, source->cursor, source->line, 0};
       break;
-    case '~': tok = (Token){TOKEN_BNOT, 1, source->cursor, 0}; break;
-    case ';': tok = (Token){TOKEN_SEMICOLON, 1, source->cursor, 0}; break;
-    case ':': tok = (Token){TOKEN_COLON, 1, source->cursor, 0}; break;
-    case ',': tok = (Token){TOKEN_COMMA, 1, source->cursor, 0}; break;
-    case '(': tok = (Token){TOKEN_LPAREN, 1, source->cursor, 0}; break;
-    case ')': tok = (Token){TOKEN_RPAREN, 1, source->cursor, 0}; break;
-    case '[': tok = (Token){TOKEN_LBRACKET, 1, source->cursor, 0}; break;
-    case ']': tok = (Token){TOKEN_RBRACKET, 1, source->cursor, 0}; break;
-    case '{': tok = (Token){TOKEN_LBRACE, 1, source->cursor, 0}; break;
-    case '}': tok = (Token){TOKEN_RBRACE, 1, source->cursor, 0}; break;
-    case '.': tok = (Token){TOKEN_DOT, 1, source->cursor, 0}; break;
-    case '?': tok = (Token){TOKEN_QUESTION, 1, source->cursor, 0}; break;
+    case '~':
+      tok = (Token){TOKEN_BNOT, 1, source->cursor, source->line, 0};
+      break;
+    case ';':
+      tok = (Token){TOKEN_SEMICOLON, 1, source->cursor, source->line, 0};
+      break;
+    case ':':
+      tok = (Token){TOKEN_COLON, 1, source->cursor, source->line, 0};
+      break;
+    case ',':
+      tok = (Token){TOKEN_COMMA, 1, source->cursor, source->line, 0};
+      break;
+    case '(':
+      tok = (Token){TOKEN_LPAREN, 1, source->cursor, source->line, 0};
+      break;
+    case ')':
+      tok = (Token){TOKEN_RPAREN, 1, source->cursor, source->line, 0};
+      break;
+    case '[':
+      tok = (Token){TOKEN_LBRACKET, 1, source->cursor, source->line, 0};
+      break;
+    case ']':
+      tok = (Token){TOKEN_RBRACKET, 1, source->cursor, source->line, 0};
+      break;
+    case '{': 
+      tok = (Token){TOKEN_LBRACE, 1, source->cursor, source->line, 0};
+      break;
+    case '}':
+      tok = (Token){TOKEN_RBRACE, 1, source->cursor, source->line, 0};
+      break;
+    case '.':
+      tok = (Token){TOKEN_DOT, 1, source->cursor, source->line, 0};
+      break;
+    case '?':
+      tok = (Token){TOKEN_QUESTION, 1, source->cursor, source->line, 0};
+      break;
     default: return 0;
   }
   source->cursor += tok.length;
-  return token_create(tok.kind, tok.loc, tok.length);
+  return token_create(tok.kind, tok.loc, tok.line, tok.length);
 }
 
 static Token* lexer_identifier(Source* source) {
@@ -232,12 +256,14 @@ static Token* lexer_identifier(Source* source) {
     .kind = TOKEN_IDENTIFIER,
     .length = source->cursor-origin,
     .loc = origin,
+    .line = source->line,
     .value.identifier = strndup(origin, source->cursor-origin)
   });
 
   return token_create(
       TOKEN_IDENTIFIER,
       origin,
+      source->line,
       (++source->cursor-origin) - 1
     );
 }
@@ -304,6 +330,7 @@ static Token* lexer_numconst(Source* source) {
   Token* tok = INIT_ALLOC(Token, {
     .kind = TOKEN_LINTEGER,
     .loc = source->cursor,
+    .line = source->line,
     .value.iliteral = strtol(origin, &source->cursor, base)
   });
   if (!tok->value.iliteral)
@@ -324,7 +351,6 @@ static Token* lexer_internal(Lexer* lexer) {
       source = (Source *)list_top(lexer->sources);
       lexer_skip(source);
     }
-
     // TODO: tokenize str/char const & wide unicode
 
     // tokenize numeric constants
@@ -356,7 +382,7 @@ static Token* lexer_internal(Lexer* lexer) {
     if (tok)
       return tok;
   }
-  return token_create(TOKEN_EOF, source->cursor, 0);
+  return token_create(TOKEN_EOF, source->cursor, source->line, 0);
 }
 
 /* --- public lexer api --- */
@@ -434,4 +460,22 @@ int lexer_eat(Lexer* lexer) {
   return 0;
 }
 
+int lexer_kget(Lexer* lexer) {
+  Token* tok;
+  if (tok = lexer_get(lexer)) {
+    int kind = tok->kind;
+    free(tok);
+    return kind;
+  }
+  return -1;
+}
 
+int lexer_kpeek(Lexer* lexer) {
+  Token* tok;
+  if (tok = lexer_peek(lexer)) {
+    int kind = tok->kind;
+    free(tok);
+    return kind;
+  }
+  return -1;
+}

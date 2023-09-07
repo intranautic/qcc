@@ -32,4 +32,8 @@ Token* lexer_peek(Lexer* lexer);
 
 /* move pointer and dont return token, returns the increment of pointer */
 int lexer_eat(Lexer* lexer);
+
+/* only return the kind of token, free token so we dont need to manage in parser */
+int lexer_kget(Lexer* lexer);
+int lexer_kpeek(Lexer* lexer);
 #endif // LEXER_H_

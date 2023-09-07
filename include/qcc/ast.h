@@ -2,6 +2,7 @@
 #define AST_H_
 
 #include "qcc/token.h"
+#include "qcc/type.h"
 
 typedef struct node Node;
 struct node {
@@ -13,10 +14,16 @@ struct node {
     EXPR_BINARY,
     EXPR_UNARY,
     EXPR_POSTFIX,
+    // special operators
+    EXPR_COMMA,
+    EXPR_SIZEOF,
+    EXPR_TYPECAST,
+    EXPR_CALL,
+    EXPR_SUBSCRIPT,
     // primary expressions
     EXPR_CONST,
-    EXPR_IDENT,
     EXPR_STRING,
+    EXPR_IDENT,
     // statement
     STMT_BLOCK,
     STMT_LABEL,
@@ -44,15 +51,30 @@ struct node {
     DECL_INITIALIZER
   } kind;
   union {
+    // expr
     struct {
-      enum {
-        //TODO: add more operators, binary unary and postfix
-        OP_ADD,
-      } op;
-      Node* left;
-      Node* right;
-    } expr;
+      Token* op;
+      Node* lhs;
+      Node* rhs;
+    } e;
+    // control
+    struct {
+      Node* cond;
+      Node* ifnode;
+      Node* elnode;
+    } c;
+    // func
+    struct {
+      Token* name;
+      Node* args;
+    } f;
+    // constant value (no symbol)
+    struct {
+      Type* type;
+      Token* value;
+    } v;
   };
+  Token* token;
   Node* next;
 };
 

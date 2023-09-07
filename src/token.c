@@ -4,10 +4,11 @@
 
 #include "qcc/token.h"
 
-Token* token_create(int kind, char* loc, int length) {
+Token* token_create(int kind, char* loc, int line, int length) {
   Token* token = malloc(sizeof(Token));
   token->kind = kind;
   token->loc = loc;
+  token->line = line;
   token->length = length;
   // init to null
   token->value.iliteral = 0;
@@ -105,8 +106,8 @@ const char* token_tostring(int kind) {
 }
 
 void token_dump(Token* token) {
-  printf("Token {\n\tkind: %s\n\tlength: %d\n\tlocation: %p\n\tvalue: ",
-    token_tostring(token->kind), token->length, token->loc);
+  printf("Token {\n\tkind: %s\n\tlength: %d\n\tlocation: %p\n\tline: %d\n\tvalue: ",
+    token_tostring(token->kind), token->length, token->loc, token->line);
   switch (token->kind) {
     case TOKEN_IDENTIFIER:
       printf("%s\n", token->value.identifier);

@@ -18,7 +18,6 @@
 typedef struct unit Unit;
 struct unit {
   Config config;
-  Source* file;
   Symtab* table;
   Lexer* lexer;
   Parser* parser;
@@ -29,4 +28,8 @@ struct unit {
   Optreg* optimize;
 };
 
+Unit* unit_create(const char* path);
+void unit_destroy(Unit* unit);
+
+int unit_compile(Unit* unit);
 #endif // UNIT_H_

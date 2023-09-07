@@ -14,4 +14,5 @@
 #include "qcc/ast.h"
 #include "qcc/parser.h"
 
+#include "qcc/unit.h"
 #endif // QCC_H_
