@@ -18,6 +18,7 @@
 typedef struct unit Unit;
 struct unit {
   Config config;
+  Source* file;
   Symtab* table;
   Lexer* lexer;
   Parser* parser;

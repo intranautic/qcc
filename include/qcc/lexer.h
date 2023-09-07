@@ -22,7 +22,7 @@ Lexer* lexer_create(void);
 void lexer_destroy(Lexer* lexer);
 
 /* register source for lexer */
-int lexer_register(Lexer* lexer, const char* path);
+int lexer_register(Lexer* lexer, Source* source);
 
 /* return a token and move up pointer */
 Token* lexer_get(Lexer* lexer);

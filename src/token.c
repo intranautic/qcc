@@ -11,7 +11,7 @@ Token* token_create(int kind, char* loc, int line, int length) {
   token->line = line;
   token->length = length;
   // init to null
-  token->value.iliteral = 0;
+  token->value.i = 0;
   return token;
 }
 
@@ -26,7 +26,7 @@ void token_destroy(Token* token) {
   if (token) {
     switch (token->kind) {
       case TOKEN_IDENTIFIER:
-        free(token->value.identifier);
+        free(token->value.ident);
         break;
       default: break;
     }
@@ -37,6 +37,25 @@ void token_destroy(Token* token) {
 
 int token_compare(Token* token, const char* string) {
   return strncmp(token->loc, string, token->length);
+}
+
+void token_printlit(Token* token) {
+  switch (token->kind) {
+    case TOKEN_LCHAR:
+      putchar(token->value.c);
+      putchar(10);
+      break;
+    case TOKEN_LSTRING:
+      puts(token->value.s);
+      break;
+    case TOKEN_LINTEGER:
+      printf("%ld\n", token->value.i);
+      break;
+    case TOKEN_LFLOAT:
+      printf("%lf", token->value.f);
+    default: break;
+  }
+  return;
 }
 
 const char* token_tostring(int kind) {
@@ -110,20 +129,20 @@ void token_dump(Token* token) {
     token_tostring(token->kind), token->length, token->loc, token->line);
   switch (token->kind) {
     case TOKEN_IDENTIFIER:
-      printf("%s\n", token->value.identifier);
+      printf("%s\n", token->value.ident);
     case TOKEN_KEYWORD:
       printf("%s\n", token->value.keyword->str);
     case TOKEN_LCHAR:
-      printf("%c\n", token->value.cliteral);
+      printf("%c\n", token->value.c);
       break;
     case TOKEN_LSTRING:
-      printf("%s\n", token->value.sliteral);
+      printf("%s\n", token->value.s);
       break;
     case TOKEN_LINTEGER:
-      printf("%ld\n", token->value.iliteral);
+      printf("%ld\n", token->value.i);
       break;
     case TOKEN_LFLOAT:
-      printf("%lf\n", token->value.fliteral);
+      printf("%lf\n", token->value.f);
       break;
     default: puts("NONE"); break;
   };

@@ -100,11 +100,11 @@ struct token {
   char* loc;
   int line;
   union {
-    char cliteral;
-    char* sliteral;
-    long iliteral;
-    double fliteral;
-    char* identifier;
+    char c;
+    char* s;
+    long i;
+    double f;
+    char* ident;
     Keyword* keyword;
   } value;
 };
@@ -116,6 +116,7 @@ void token_destroy(Token* token);
 
 /* debugging routines for token */
 int token_compare(Token* token, const char* string);
+void token_printlit(Token* token);
 const char* token_tostring(int kind);
 void token_dump(Token* token);
 #endif // TOKEN_H_

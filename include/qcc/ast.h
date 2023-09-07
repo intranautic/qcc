@@ -10,7 +10,6 @@ struct node {
     // expression
     EXPR_ASSIGN,
     EXPR_CONDITION,
-    EXPR_TERNARY,
     EXPR_BINARY,
     EXPR_UNARY,
     EXPR_POSTFIX,
@@ -79,4 +78,5 @@ struct node {
 };
 
 /* no constructor/destructor apis, use initalloc for complex types */
+void ast_dump(Node* root, int depth);
 #endif // AST_H_

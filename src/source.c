@@ -11,7 +11,7 @@ Source* source_create(const char* path) {
   source->path = path;
   source->file = tmp;
   source->contents = source->cursor = NULL;
-
+  source->line = 1;
   fseek(source->file, 0, SEEK_END);
   source->size = ftell(source->file);
   rewind(source->file);

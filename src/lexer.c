@@ -257,7 +257,7 @@ static Token* lexer_identifier(Source* source) {
     .length = source->cursor-origin,
     .loc = origin,
     .line = source->line,
-    .value.identifier = strndup(origin, source->cursor-origin)
+    .value.ident = strndup(origin, source->cursor-origin)
   });
 
   return token_create(
@@ -295,10 +295,10 @@ static Token* lexer_floatconst(Source* source) {
     .kind = TOKEN_LFLOAT,
     .length = 0,
     .loc = source->cursor,
-    .value.fliteral = 0
+    .value.f = 0
   };
 
-  if (!(tok.value.fliteral = strtod(tok.loc, &source->cursor)))
+  if (!(tok.value.f = strtod(tok.loc, &source->cursor)))
     return 0;
 
   tok.length = source->cursor - tok.loc;
@@ -331,9 +331,9 @@ static Token* lexer_numconst(Source* source) {
     .kind = TOKEN_LINTEGER,
     .loc = source->cursor,
     .line = source->line,
-    .value.iliteral = strtol(origin, &source->cursor, base)
+    .value.i = strtol(origin, &source->cursor, base)
   });
-  if (!tok->value.iliteral)
+  if (!tok->value.i)
     return 0;
 
   tok->length = source->cursor - origin;
@@ -367,10 +367,10 @@ static Token* lexer_internal(Lexer* lexer) {
 
       // if identifier is a keyword, return keyword token instead
       Entry* kwrd_entry =
-        hashmap_retrieve(lexer->keywords, tok->value.identifier);
+        hashmap_retrieve(lexer->keywords, tok->value.ident);
 
       if (kwrd_entry) {
-        free(tok->value.identifier);
+        free(tok->value.ident);
         tok->kind = TOKEN_KEYWORD;
         tok->value.keyword = (Keyword *)kwrd_entry->value;
       }
@@ -414,13 +414,10 @@ void lexer_destroy(Lexer* lexer) {
   return;
 }
 
-int lexer_register(Lexer* lexer, const char* path) {
-  if (lexer) {
-    Source* source = source_create(path);
-    if (source)
-      return list_fpush(&lexer->sources, source);
-  }
-  return -1;
+int lexer_register(Lexer* lexer, Source* source) {
+  return (lexer && source)
+    ? list_fpush(&lexer->sources, source)
+    : -1;
 }
 
 Token* lexer_get(Lexer* lexer) {
