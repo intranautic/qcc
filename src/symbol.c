@@ -87,7 +87,7 @@ int symtab_install(Symtab* table, Symbol* symbol) {
   return hashmap_insert(
     table->current->lookup,
     &(Entry) {
-      .key = symbol->ident->value.identifier,
+      .key = symbol->ident->value.ident,
       .value = symbol
     }
   );
@@ -99,7 +99,7 @@ int symtab_remove(Symtab* table, Symbol* symbol) {
 
   return hashmap_remove(
     table->current->lookup,
-    symbol->ident->value.identifier
+    symbol->ident->value.ident
   );
 }
 
@@ -108,7 +108,7 @@ Symbol* scope_lookup(Scope* scope, Token* ident) {
   if (!scope)
     return NULL;
 
-  Entry* result = hashmap_retrieve(scope->lookup, ident->value.identifier);
+  Entry* result = hashmap_retrieve(scope->lookup, ident->value.ident);
   return (result)
     ? (Symbol *)result->value
     : scope_lookup(scope->upref, ident);
