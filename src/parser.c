@@ -241,9 +241,34 @@ static Node* parse_cond_expr(Parser* parser) {
 //   conditional-expression
 //   unary-expression assign-operator assignment-expression
 // assign-operator:
-//   one of= += -= *= /= %= <<= >>= &= A= I=
+//   one of = += -= *= /= %= <<= >>= &= &= I=
 static Node* parse_assign_expr(Parser* parser) {
   Node* node = parse_cond_expr(parser);
+  Token* tok;
+  while (tok = lexer_peek(parser->lexer)) {
+    switch (tok->kind) {
+      case TOKEN_ASSIGN:
+      case TOKEN_ASGN_ADD:
+      case TOKEN_ASGN_SUB:
+      case TOKEN_ASGN_MUL:
+      case TOKEN_ASGN_DIV:
+      case TOKEN_ASGN_MOD:
+      case TOKEN_ASGN_BAND:
+      case TOKEN_ASGN_BOR:
+      case TOKEN_ASGN_BXOR:
+      case TOKEN_ASGN_BLSHIFT:
+      case TOKEN_ASGN_BRSHIFT:
+        lexer_eat(parser->lexer);
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_ASSIGN,
+          .e.op = tok,
+          .e.lhs = node,
+          .e.rhs = parse_cond_expr(parser)
+        });
+        break;
+      default: return node;
+    }
+  }
   return node;
 }
 
