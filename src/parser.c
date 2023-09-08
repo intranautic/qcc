@@ -100,26 +100,11 @@ static Node* parse_unary_expr(Parser* parser) {
 //   unary-expression { binary-operator unary-expression }
 // binary-operator:
 //   one of || && | ^ & == != < > <= >= << >> + - * / %
-static Node* parse_binary_expr(Parser* parser) {
+static Node* parse_binary_expr2(Parser* parser) {
   Node* node = parse_unary_expr(parser);
   Token* tok;
   while (tok = lexer_peek(parser->lexer)) {
     switch (tok->kind) {
-      case TOKEN_LOR:
-      case TOKEN_LAND:
-      case TOKEN_BOR:
-      case TOKEN_BXOR:
-      case TOKEN_BAND:
-      case TOKEN_EQ:
-      case TOKEN_NE:
-      case TOKEN_LT:
-      case TOKEN_GT:
-      case TOKEN_LTE:
-      case TOKEN_GTE:
-      case TOKEN_BLSHIFT:
-      case TOKEN_BRSHIFT:
-      case TOKEN_ADD:
-      case TOKEN_SUB:
       case TOKEN_MUL:
       case TOKEN_DIV:
       case TOKEN_MOD:
@@ -137,10 +122,118 @@ static Node* parse_binary_expr(Parser* parser) {
   return node;
 }
 
+static Node* parse_binary_expr(Parser* parser) {
+  Node* node = parse_binary_expr2(parser);
+  Token* tok;
+  while (tok = lexer_peek(parser->lexer)) {
+    switch (tok->kind) {
+      case TOKEN_ADD:
+      case TOKEN_SUB:
+        lexer_eat(parser->lexer);
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_BINARY,
+          .e.op = tok,
+          .e.lhs = node,
+          .e.rhs = parse_binary_expr2(parser)
+        });
+        break;
+      default: return node;
+    }
+  }
+  return node;
+}
+
+static Node* parse_relational_expr(Parser* parser) {
+  Node* node = parse_binary_expr(parser);
+  Token* tok;
+  while (tok = lexer_peek(parser->lexer)) {
+    switch (tok->kind) {
+      case TOKEN_EQ:
+      case TOKEN_NE:
+      case TOKEN_LT:
+      case TOKEN_GT:
+      case TOKEN_LTE:
+      case TOKEN_GTE:
+        lexer_eat(parser->lexer);
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_BINARY,
+          .e.op = tok,
+          .e.lhs = node,
+          .e.rhs = parse_binary_expr(parser)
+        });
+        break;
+      default: return node;
+    }
+  }
+  return node;
+}
+
+static Node* parse_bitwise_expr(Parser* parser) {
+  Node* node = parse_relational_expr(parser);
+  Token* tok;
+  while (tok = lexer_peek(parser->lexer)) {
+    switch (tok->kind) {
+      case TOKEN_BOR:
+      case TOKEN_BAND:
+      case TOKEN_BNOT:
+      case TOKEN_BLSHIFT:
+      case TOKEN_BRSHIFT:
+        lexer_eat(parser->lexer);
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_BINARY,
+          .e.op = tok,
+          .e.lhs = node,
+          .e.rhs = parse_relational_expr(parser)
+        });
+        break;
+      default: return node;
+    }
+  }
+  return node;
+}
+
+static Node* parse_logic_expr(Parser* parser) {
+  Node* node = parse_bitwise_expr(parser);
+  Token* tok;
+  while (tok = lexer_peek(parser->lexer)) {
+    switch (tok->kind) {
+      case TOKEN_LOR:
+      case TOKEN_LAND:
+      case TOKEN_LNOT:
+        lexer_eat(parser->lexer);
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_BINARY,
+          .e.op = tok,
+          .e.lhs = node,
+          .e.rhs = parse_bitwise_expr(parser)
+        });
+        break;
+      default: return node;
+    }
+  }
+  return node;
+}
+
 // conditional-expression:
 //   binary-expression [ ? expression : conditional-expression ]
 static Node* parse_cond_expr(Parser* parser) {
-  Node* node = parse_binary_expr(parser);
+  Node* node = parse_logic_expr(parser);
+  Token* tok = lexer_peek(parser->lexer);
+  if (tok && tok->kind == TOKEN_QUESTION) {
+    lexer_eat(parser->lexer);
+
+    Node* lhs = parse_expr(parser);
+    tok = lexer_get(parser->lexer);
+    if (!tok || tok->kind != TOKEN_COLON)
+      logger_fatal(-1, "Invalid ternary expression at line %d\n", tok->line);
+
+    node = INIT_ALLOC(Node, {
+      .kind = EXPR_TERNARY,
+      .c.cond = node,
+      .c.ifnode = lhs,
+      .c.elnode = parse_cond_expr(parser)
+    });
+  }
   return node;
 }
 
@@ -158,13 +251,12 @@ static Node* parse_assign_expr(Parser* parser) {
 //   assignment-expression { , assignment-expression }
 static Node* parse_expr(Parser* parser) {
   Node* node = parse_assign_expr(parser);
-
   Token* tok;
   while (tok = lexer_peek(parser->lexer)) {
     if (tok->kind == TOKEN_COMMA) {
       lexer_eat(parser->lexer);
       node = INIT_ALLOC(Node, {
-        .kind = EXPR_COMMA,
+        .kind = EXPR_BINARY,
         .e.op = tok,
         .e.lhs = node,
         .e.rhs = parse_assign_expr(parser)

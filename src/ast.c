@@ -12,15 +12,10 @@ static void depth_pad(int n) {
 void ast_dump(Node* root, int depth) {
   static const char* ast_map[] = {
     [EXPR_ASSIGN] = "EXPR_ASSIGN:",
-    [EXPR_CONDITION] = "EXPR_CONDITION:",
     [EXPR_BINARY] = "EXPR_BINARY:",
     [EXPR_UNARY] = "EXPR_UNARY:",
     [EXPR_POSTFIX] = "EXPR_POSTFIX:",
-    [EXPR_COMMA] = "EXPR_COMMA:",
-    [EXPR_SIZEOF] = "EXPR_SIZEOF:",
-    [EXPR_TYPECAST] = "EXPR_TYPECAST:",
-    [EXPR_CALL] = "EXPR_CALL:",
-    [EXPR_SUBSCRIPT] = "EXPR_SUBSCRIPT:",
+    [EXPR_TERNARY] = "EXPR_TERNARY:",
     [EXPR_CONST] = "EXPR_CONST:",
     [EXPR_STRING] = "EXPR_STRING:",
     [EXPR_IDENT] = "EXPR_IDENT:",
@@ -50,13 +45,17 @@ void ast_dump(Node* root, int depth) {
   depth_pad(depth);
   puts(ast_map[root->kind]);
   switch (root->kind) {
+    case EXPR_IDENT:
+      depth_pad(depth + 1);
+      printf("name: ");
+      puts(root->token->value.ident);
+      break;
     case EXPR_CONST:
       depth_pad(depth + 1);
       printf("Value: ");
       token_printlit(root->v.value);
       break;
     case EXPR_ASSIGN:
-    case EXPR_CONDITION:
     case EXPR_BINARY:
       depth_pad(depth + 1);
       printf("Operator: %s\n", token_tostring(root->e.op->kind));
@@ -68,6 +67,22 @@ void ast_dump(Node* root, int depth) {
       puts("Right: ");
       if (root->e.rhs)
         ast_dump(root->e.rhs, depth+2);
+      break;
+    case EXPR_TERNARY:
+      depth_pad(depth + 1);
+      puts("Condition: ");
+      if (root->c.cond)
+        ast_dump(root->c.cond, depth+2);
+
+      depth_pad(depth + 1);
+      puts("Then: ");
+      if (root->c.ifnode)
+        ast_dump(root->c.ifnode, depth+2);
+
+      depth_pad(depth + 1);
+      puts("Else: ");
+      if (root->c.elnode)
+        ast_dump(root->c.elnode, depth+2);
       break;
     default: break;
   }

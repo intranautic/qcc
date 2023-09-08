@@ -9,16 +9,11 @@ struct node {
   enum {
     // expression
     EXPR_ASSIGN,
-    EXPR_CONDITION,
     EXPR_BINARY,
     EXPR_UNARY,
     EXPR_POSTFIX,
-    // special operators
-    EXPR_COMMA,
-    EXPR_SIZEOF,
-    EXPR_TYPECAST,
-    EXPR_CALL,
-    EXPR_SUBSCRIPT,
+    // conditional
+    EXPR_TERNARY,
     // primary expressions
     EXPR_CONST,
     EXPR_STRING,
@@ -77,6 +72,5 @@ struct node {
   Node* next;
 };
 
-/* no constructor/destructor apis, use initalloc for complex types */
 void ast_dump(Node* root, int depth);
 #endif // AST_H_

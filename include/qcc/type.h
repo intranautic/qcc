@@ -25,7 +25,7 @@ extern Type* pred_ldouble;
 typedef struct field Field;
 struct field {
   Type* type;
-  Token* ident;
+  Token* name;
   int index;
   int align;
   int offset;
