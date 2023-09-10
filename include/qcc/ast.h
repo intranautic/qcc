@@ -1,17 +1,22 @@
 #ifndef AST_H_
 #define AST_H_
 
+#include "qcc/symbol.h"
 #include "qcc/token.h"
 #include "qcc/type.h"
 
 typedef struct node Node;
 struct node {
   enum {
+    // type node
+    EXPR_TYPE,
     // expression
     EXPR_ASSIGN,
     EXPR_BINARY,
     EXPR_UNARY,
     EXPR_POSTFIX,
+    // special
+    EXPR_TYPECAST,
     // conditional
     EXPR_TERNARY,
     // primary expressions
@@ -67,10 +72,22 @@ struct node {
       Type* type;
       Token* value;
     } v;
+    // statement
+    struct {
+      Node* expr;
+      Node* next;
+    } s;
+    // reference to declaration
+    Symbol* decl;
+    Token* ident;
   };
-  Token* token;
-  Node* next;
 };
 
+/* recursively dump tree */
 void ast_dump(Node* root, int depth);
+/* recursively destroy tree */
+void ast_destroy(Node* root);
+
+/* premature optimization on ast */
+int ast_constfold(Node* root);
 #endif // AST_H_

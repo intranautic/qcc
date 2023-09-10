@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdarg.h>
+#include <stdlib.h>
 
 #include "qcc/ast.h"
 
@@ -42,13 +42,16 @@ void ast_dump(Node* root, int depth) {
     [DECL_FUNCTION] = "DECL_FUNCTION:",
     [DECL_INITIALIZER] = "DECL_INITIALIZER:"
   };
+  if (!root)
+    return;
+
   depth_pad(depth);
   puts(ast_map[root->kind]);
   switch (root->kind) {
     case EXPR_IDENT:
       depth_pad(depth + 1);
       printf("name: ");
-      puts(root->token->value.ident);
+      puts(root->ident->value.ident);
       break;
     case EXPR_CONST:
       depth_pad(depth + 1);
@@ -57,16 +60,23 @@ void ast_dump(Node* root, int depth) {
       break;
     case EXPR_ASSIGN:
     case EXPR_BINARY:
+    case EXPR_UNARY:
+    case EXPR_POSTFIX:
       depth_pad(depth + 1);
       printf("Operator: %s\n", token_tostring(root->e.op->kind));
       depth_pad(depth + 1);
-      puts("Left: ");
-      if (root->e.lhs)
+      if (root->e.lhs) {
+        puts("Left: ");
         ast_dump(root->e.lhs, depth+2);
+      } else // postfix
+        putchar(10);
+
       depth_pad(depth + 1);
-      puts("Right: ");
-      if (root->e.rhs)
+      if (root->e.rhs) {
+        puts("Right: ");
         ast_dump(root->e.rhs, depth+2);
+      } else // unary
+        putchar(10);
       break;
     case EXPR_TERNARY:
       depth_pad(depth + 1);
@@ -89,4 +99,45 @@ void ast_dump(Node* root, int depth) {
   return;
 }
 
+void ast_destroy(Node* root) {
+  if (!root)
+    return;
 
+  switch (root->kind) {
+    case EXPR_IDENT:
+      if (root->ident)
+        token_destroy(root->ident);
+      free(root);
+      break;
+    case EXPR_CONST:
+      if (root->v.type)
+        type_destroy(root->v.type);
+      if (root->v.value)
+        token_destroy(root->v.value);
+      free(root);
+      break;
+    case EXPR_ASSIGN:
+    case EXPR_BINARY:
+    case EXPR_UNARY:
+    case EXPR_POSTFIX:
+      if (root->e.op)
+        token_destroy(root->e.op);
+      if (root->e.lhs)
+        ast_destroy(root->e.lhs);
+      if (root->e.rhs)
+        ast_destroy(root->e.rhs);
+      free(root);
+      break;
+    case EXPR_TERNARY:
+      if (root->c.cond)
+        ast_destroy(root->c.cond);
+      if (root->c.ifnode)
+        ast_destroy(root->c.ifnode);
+      if (root->c.elnode)
+        ast_destroy(root->c.elnode);
+      free(root);
+      break;
+    default: break;
+  }
+  return;
+}

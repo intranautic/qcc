@@ -39,6 +39,9 @@ bool type_isnum(Type* type) {
 
 bool type_isptr(Type* type) { return type->kind == TYPE_POINTER; }
 
+Type* type_construct(int size, int align) {}
+void type_destroy(Type* type) {}
+
 Type* type_ptrto(Type* type) {
   // ptr size determined by platform arch, keep 0 for now
   return (type)

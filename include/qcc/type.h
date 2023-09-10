@@ -7,9 +7,9 @@
 #include "qcc/token.h"
 
 typedef struct type Type;
+extern Type* pred_enum;
 extern Type* pred_void;
 extern Type* pred_bool;
-extern Type* pred_enum;
 extern Type* pred_char;
 extern Type* pred_short;
 extern Type* pred_int;
@@ -94,8 +94,9 @@ bool type_islong(Type* type);
 bool type_isunsign(Type* type);
 bool type_isnum(Type* type);
 
-/* type constructor apis, build from predicates */
+/* type constructor/destructor apis, construct from predicates */
 Type* type_construct(int size, int align);
+void type_destroy(Type* type);
 /* reference and dereference type */
 Type* type_ptrto(Type* type);
 Type* type_ptrfrom(Type* type);

@@ -6,8 +6,11 @@ int main(int argc, const char** argv) {
   logger_register("default", LOG_INFO, stderr);
 
   if (argv[1]) {
-    Unit* unit = unit_create(argv[1]);
+    Unit* unit = unit_create();
+    if (unit_register(unit, argv[1]) == -1)
+      puts("could not register file");
     unit_compile(unit);
+    unit_destroy(unit);
   }
 
   logger_destroy();

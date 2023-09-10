@@ -15,6 +15,7 @@ struct lexer {
   Hashmap* macros;
   List* expand;
   List* sources;
+  Token* cache;
 };
 
 /* constructor/destructor methods for lexer */
@@ -27,13 +28,9 @@ int lexer_register(Lexer* lexer, Source* source);
 /* return a token and move up pointer */
 Token* lexer_get(Lexer* lexer);
 
-/* return token but dont move pointer */
+/* return or update token peek cache */
 Token* lexer_peek(Lexer* lexer);
 
-/* move pointer and dont return token, returns the increment of pointer */
-int lexer_eat(Lexer* lexer);
-
-/* only return the kind of token, free token so we dont need to manage in parser */
-int lexer_kget(Lexer* lexer);
-int lexer_kpeek(Lexer* lexer);
+/* eat cache or literal token */
+void lexer_eat(Lexer* lexer);
 #endif // LEXER_H_

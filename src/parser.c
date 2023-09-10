@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "qcc/parser.h"
 #include "qcc/logger.h"
@@ -17,53 +18,55 @@ static Node* parse_cond_expr(Parser* parser);
 static Node* parse_assign_expr(Parser* parser);
 static Node* parse_expr(Parser* parser);
 /* --- parser implementation --- */
-
 // primary-expression:
 //   identifer
 //   constant
 //   string-literal
 //   '(' expression ')' 
 static Node* parse_primary_expr(Parser* parser) {
-  Token* tok = lexer_get(parser->lexer);
+  Token* tok;
   Node* node;
-  switch (tok->kind) {
-    case TOKEN_IDENTIFIER:
-      node = INIT_ALLOC(Node, {
-        .kind = EXPR_IDENT,
-        .token = tok,
-        .next = NULL
-      });
-      break;
-    case TOKEN_LCHAR:
-      node = INIT_ALLOC(Node, {
-        .kind = EXPR_CONST,
-        .v.type = pred_char,
-        .v.value = tok
-      });
-      break;
-    //TODO: implement string lexing and const (reloc)
-    case TOKEN_LSTRING: break;
-    case TOKEN_LINTEGER:
-      node = INIT_ALLOC(Node, {
-        .kind = EXPR_CONST,
-        .v.type = pred_long,
-        .v.value = tok
-      });
-      break;
-    case TOKEN_LFLOAT:
-      node = INIT_ALLOC(Node, {
-        .kind = EXPR_CONST,
-        .v.type = pred_double,
-        .v.value = tok
-      });
-      break;
-    case TOKEN_LPAREN:
-      node = parse_expr(parser);
-      tok = lexer_get(parser->lexer);
-      if (!tok || tok->kind != TOKEN_RPAREN)
-        logger_fatal(-1, "Unclosed parenthesis on line %d\n", tok->line);
-      break;
-    default: return NULL;
+  if (tok = lexer_peek(parser->lexer)) {
+    switch (tok->kind) {
+      // TODO: implement string lexing and reloc static literal string type
+      case TOKEN_LSTRING: break;
+      // TODO: perform lookup in symbol table once decl and types are done
+      case TOKEN_IDENTIFIER:
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_IDENT,
+          .ident = lexer_get(parser->lexer)
+        });
+        break;
+      case TOKEN_LCHAR:
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_CONST,
+          .v.type = pred_char,
+          .v.value = lexer_get(parser->lexer)
+        });
+        break;
+      case TOKEN_LINTEGER:
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_CONST,
+          .v.type = pred_long,
+          .v.value = lexer_get(parser->lexer)
+        });
+        break;
+      case TOKEN_LFLOAT:
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_CONST,
+          .v.type = pred_double,
+          .v.value = lexer_get(parser->lexer)
+        });
+        break;
+      case TOKEN_LPAREN:
+        lexer_eat(parser->lexer);
+        node = parse_expr(parser);
+        tok = lexer_get(parser->lexer);
+        if (!tok || tok->kind != TOKEN_RPAREN)
+          logger_fatal(-1, "Unclosed parenthesis on line %d\n", tok->line);
+        break;
+      default: return NULL;
+    }
   }
   return node;
 }
@@ -89,9 +92,38 @@ static Node* parse_postfix_expr(Parser* parser) {
 //   sizeof unary-expression
 //   sizeof ' ( ' type-name ' ) '
 // unary-operator:
-//   one of ++ -- & * + - - !
+//   one of ++ -- & * + - ~ !
 static Node* parse_unary_expr(Parser* parser) {
-  Node* node = parse_postfix_expr(parser);
+  Node* node;
+  Token* tok;
+  if (tok = lexer_peek(parser->lexer)) {
+    switch (tok->kind) {
+      // TODO: typecast (needs declspec and type parsing)
+      case TOKEN_RPAREN: break;
+      // sizeof operator
+      case TOKEN_KEYWORD:
+        if (strcmp(tok->value.keyword->str, "sizeof"))
+          break;
+      case TOKEN_INC:
+      case TOKEN_DEC:
+      // reference
+      case TOKEN_BAND:
+      // dereference
+      case TOKEN_MUL:
+      case TOKEN_ADD:
+      case TOKEN_SUB:
+      case TOKEN_BNOT:
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_UNARY,
+          .e.op = lexer_get(parser->lexer),
+          .e.lhs = parse_unary_expr(parser)
+        });
+        break;
+      default:
+        node = parse_postfix_expr(parser);
+        break;
+    }
+  }
   return node;
 }
 
@@ -108,10 +140,9 @@ static Node* parse_binary_expr2(Parser* parser) {
       case TOKEN_MUL:
       case TOKEN_DIV:
       case TOKEN_MOD:
-        lexer_eat(parser->lexer);
         node = INIT_ALLOC(Node, {
           .kind = EXPR_BINARY,
-          .e.op = tok,
+          .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_unary_expr(parser)
         });
@@ -129,10 +160,9 @@ static Node* parse_binary_expr(Parser* parser) {
     switch (tok->kind) {
       case TOKEN_ADD:
       case TOKEN_SUB:
-        lexer_eat(parser->lexer);
         node = INIT_ALLOC(Node, {
           .kind = EXPR_BINARY,
-          .e.op = tok,
+          .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_binary_expr2(parser)
         });
@@ -154,10 +184,9 @@ static Node* parse_relational_expr(Parser* parser) {
       case TOKEN_GT:
       case TOKEN_LTE:
       case TOKEN_GTE:
-        lexer_eat(parser->lexer);
         node = INIT_ALLOC(Node, {
           .kind = EXPR_BINARY,
-          .e.op = tok,
+          .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_binary_expr(parser)
         });
@@ -178,10 +207,9 @@ static Node* parse_bitwise_expr(Parser* parser) {
       case TOKEN_BNOT:
       case TOKEN_BLSHIFT:
       case TOKEN_BRSHIFT:
-        lexer_eat(parser->lexer);
         node = INIT_ALLOC(Node, {
           .kind = EXPR_BINARY,
-          .e.op = tok,
+          .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_relational_expr(parser)
         });
@@ -200,10 +228,9 @@ static Node* parse_logic_expr(Parser* parser) {
       case TOKEN_LOR:
       case TOKEN_LAND:
       case TOKEN_LNOT:
-        lexer_eat(parser->lexer);
         node = INIT_ALLOC(Node, {
           .kind = EXPR_BINARY,
-          .e.op = tok,
+          .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_bitwise_expr(parser)
         });
@@ -245,7 +272,7 @@ static Node* parse_cond_expr(Parser* parser) {
 static Node* parse_assign_expr(Parser* parser) {
   Node* node = parse_cond_expr(parser);
   Token* tok;
-  while (tok = lexer_peek(parser->lexer)) {
+  if (tok = lexer_peek(parser->lexer)) {
     switch (tok->kind) {
       case TOKEN_ASSIGN:
       case TOKEN_ASGN_ADD:
@@ -261,9 +288,9 @@ static Node* parse_assign_expr(Parser* parser) {
         lexer_eat(parser->lexer);
         node = INIT_ALLOC(Node, {
           .kind = EXPR_ASSIGN,
-          .e.op = tok,
+          .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
-          .e.rhs = parse_cond_expr(parser)
+          .e.rhs = parse_assign_expr(parser)
         });
         break;
       default: return node;
@@ -282,7 +309,7 @@ static Node* parse_expr(Parser* parser) {
       lexer_eat(parser->lexer);
       node = INIT_ALLOC(Node, {
         .kind = EXPR_BINARY,
-        .e.op = tok,
+        .e.op = lexer_get(parser->lexer),
         .e.lhs = node,
         .e.rhs = parse_assign_expr(parser)
       });

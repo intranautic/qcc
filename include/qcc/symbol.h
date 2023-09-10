@@ -11,7 +11,6 @@ typedef struct scope Scope;
 typedef struct symtab Symtab;
 struct symbol {
   enum {
-    STORE_TYPEDEF,
     STORE_EXTERN,
     STORE_STATIC,
     STORE_AUTO,
@@ -24,6 +23,7 @@ struct symbol {
 
 struct scope {
   Hashmap* lookup;
+  Hashmap* typeref;
   Scope* upref;
   List* subscope;
 };

@@ -7,6 +7,7 @@
 static Scope* scope_create(Scope* upref) {
   Scope* scope = (Scope *)malloc(sizeof(Scope));
   scope->lookup = hashmap_create();
+  scope->typeref = hashmap_create();
   scope->upref = upref;
   scope->subscope = NULL;
   return scope;
@@ -25,8 +26,18 @@ static void scope_destroy(Scope* scope) {
   }
 
   hashmap_destroy(scope->lookup);
+  hashmap_destroy(scope->typeref);
   free(scope);
   return;
+}
+
+static int scope_typedef(Scope* scope, const char* name, Type* type) {
+  return (scope)
+    ? hashmap_insert(scope->typeref, &(Entry) {
+      .key = name,
+      .value = (void *)type
+    })
+    : -1;
 }
 
 /* --- public symbol object api --- */
@@ -50,6 +61,15 @@ Symtab* symtab_create(void) {
   Symtab* table = (Symtab *)malloc(sizeof(Symtab));
   table->tag = scope_create(NULL);
   table->current = table->global = scope_create(NULL);
+  // install predicate types into global scope
+  scope_typedef(table->global, "void", pred_void);
+  scope_typedef(table->global, "_Bool", pred_bool);
+  scope_typedef(table->global, "char", pred_char);
+  scope_typedef(table->global, "short", pred_short);
+  scope_typedef(table->global, "int", pred_int);
+  scope_typedef(table->global, "long", pred_long);
+  scope_typedef(table->global, "float", pred_float);
+  scope_typedef(table->global, "double", pred_double);
   return table;
 }
 

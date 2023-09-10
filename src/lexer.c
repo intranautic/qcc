@@ -389,6 +389,7 @@ static Token* lexer_internal(Lexer* lexer) {
 Lexer* lexer_create(void) {
   Lexer* lexer = malloc(sizeof(Lexer));
   lexer->sources = NULL;
+  lexer->cache = NULL;
   lexer->keywords = hashmap_create();
   for (int i = 0; i < KWRD_END; ++i) {
     hashmap_insert(lexer->keywords, &(Entry) {
@@ -405,7 +406,8 @@ Lexer* lexer_create(void) {
 
 void lexer_destroy(Lexer* lexer) {
   if (lexer) {
-    // lexer->sources passed as pointer, dont dealloc
+    if (lexer->cache)
+      token_destroy(lexer->cache);
     hashmap_destroy(lexer->keywords);
     hashmap_destroy(lexer->macros);
     list_destroy(lexer->expand);
@@ -421,12 +423,18 @@ int lexer_register(Lexer* lexer, Source* source) {
 }
 
 Token* lexer_get(Lexer* lexer) {
+  Token* tok;
   if (lexer && list_length(lexer->sources) > 0) {
+    if (lexer->cache) {
+      tok = lexer->cache;
+      lexer->cache = NULL;
+      return tok;
+    }
     Source* source = (Source *)list_top(lexer->sources);
     if (!source->is_ready)
       source_fill(source);
 
-    Token* tok = lexer_internal(lexer);
+    tok = lexer_internal(lexer);
     if (tok->kind == TOKEN_EOF) {
       source_destroy(
         list_fpop(&lexer->sources)
@@ -438,41 +446,15 @@ Token* lexer_get(Lexer* lexer) {
 }
 
 Token* lexer_peek(Lexer* lexer) {
-  Token* tok;
-  if (tok = lexer_get(lexer)) {
-    Source* source = (Source *)list_top(lexer->sources);
-    source->cursor -= tok->length;
-    return tok;
-  }
-  return 0;
+  if (lexer->cache)
+    return lexer->cache;
+
+  lexer->cache = lexer_get(lexer);
+  return lexer->cache;
 }
 
-int lexer_eat(Lexer* lexer) {
-  Token* tok;
-  if (tok = lexer_get(lexer)) {
-    int length = tok->length;
-    free(tok);
-    return length;
-  }
-  return 0;
+void lexer_eat(Lexer* lexer) {
+  lexer_get(lexer);
+  return;
 }
 
-int lexer_kget(Lexer* lexer) {
-  Token* tok;
-  if (tok = lexer_get(lexer)) {
-    int kind = tok->kind;
-    free(tok);
-    return kind;
-  }
-  return -1;
-}
-
-int lexer_kpeek(Lexer* lexer) {
-  Token* tok;
-  if (tok = lexer_peek(lexer)) {
-    int kind = tok->kind;
-    free(tok);
-    return kind;
-  }
-  return -1;
-}

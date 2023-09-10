@@ -18,7 +18,7 @@
 typedef struct unit Unit;
 struct unit {
   Config config;
-  Source* file;
+  const char* file;
   Symtab* table;
   Lexer* lexer;
   Parser* parser;
@@ -29,8 +29,11 @@ struct unit {
   Optreg* optimize;
 };
 
-Unit* unit_create(const char* path);
+/* translation unit constructor/destructor methods */
+Unit* unit_create(void);
 void unit_destroy(Unit* unit);
-
+/* register a file as source of translation unit */
+int unit_register(Unit* unit, const char* file);
+/* compile single translation unit, can be multithreaded */
 int unit_compile(Unit* unit);
 #endif // UNIT_H_
