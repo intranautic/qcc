@@ -17,7 +17,31 @@ static Node* parse_binary_expr(Parser* parser);
 static Node* parse_cond_expr(Parser* parser);
 static Node* parse_assign_expr(Parser* parser);
 static Node* parse_expr(Parser* parser);
+
 /* --- parser implementation --- */
+// statement:
+//  ID: statement
+//  case constant-expression : statement
+//  default: statement
+//  [ expression ] ;
+//  if ( expression ) statement
+//  if ( expression ) statement else statement
+//  switch ( expression ) statement
+//  while ( expression ) statement
+//  do statement while ( expression )
+//  for ( [ expression ] ; [ expression ] ; [ expression ] )
+//    statement
+//  break;
+//  continue;
+//  goto ID;
+//  return [ expression];
+//  compound-statement
+static Node* parse_stmt(Parser* parser) {
+}
+
+
+
+
 // primary-expression:
 //   identifer
 //   constant
@@ -93,17 +117,13 @@ static Node* parse_postfix_expr(Parser* parser) {
 //   sizeof ' ( ' type-name ' ) '
 // unary-operator:
 //   one of ++ -- & * + - ~ !
+// TODO: typecast (needs declspec and type parsing)
+// TODO: implement sizeof unary operator parsing
 static Node* parse_unary_expr(Parser* parser) {
   Node* node;
   Token* tok;
   if (tok = lexer_peek(parser->lexer)) {
     switch (tok->kind) {
-      // TODO: typecast (needs declspec and type parsing)
-      case TOKEN_RPAREN: break;
-      // sizeof operator
-      case TOKEN_KEYWORD:
-        if (strcmp(tok->value.keyword->str, "sizeof"))
-          break;
       case TOKEN_INC:
       case TOKEN_DEC:
       // reference
@@ -248,7 +268,6 @@ static Node* parse_cond_expr(Parser* parser) {
   Token* tok = lexer_peek(parser->lexer);
   if (tok && tok->kind == TOKEN_QUESTION) {
     lexer_eat(parser->lexer);
-
     Node* lhs = parse_expr(parser);
     tok = lexer_get(parser->lexer);
     if (!tok || tok->kind != TOKEN_COLON)

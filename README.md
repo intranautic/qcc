@@ -4,13 +4,11 @@ The Quick C Compiler (qcc) is a retargetable, optimizing and self-hosting
 C compiler for the ISO C99 standard written from scratch.
 
 For more information on the internal architecture and implementation of the
-compiler, please view the [documentation](/docs). If you would like to
-contribute to the project, please view the [contributing](/CONTRIBUTING.MD)
-document before submitting a pull request.
+compiler, please view the [documentation](/docs). The eventual goal of this
+project is to be capable of compiling itself (self-hosting) as well as large
+scale and relevant code bases such as [sqlite](https://github.com/sqlite/sqlite)
+and [lua](https://github.com/lua/lua).
 
-The eventual goal of this project is to be capable of compiling itself
-(self-hosting) as well as large scale and relevant code bases such as
-[sqlite](https://github.com/sqlite/sqlite) and [lua](https://github.com/lua/lua).
 This is a personal project of mine, which in large part implies the fact that
 it isnt nearly as robust or mature as a decently capable compiler would be. Keep
 in mind that this project is likely riddled with bugs en masse.
