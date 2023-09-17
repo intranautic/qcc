@@ -15,6 +15,8 @@ void ast_dump(Node* root, int depth) {
     [EXPR_BINARY] = "EXPR_BINARY:",
     [EXPR_UNARY] = "EXPR_UNARY:",
     [EXPR_POSTFIX] = "EXPR_POSTFIX:",
+    [EXPR_CALL] = "EXPR_CALL:",
+    [EXPR_TYPECAST] = "EXPR_TYPECAST",
     [EXPR_TERNARY] = "EXPR_TERNARY:",
     [EXPR_CONST] = "EXPR_CONST:",
     [EXPR_STRING] = "EXPR_STRING:",
@@ -94,6 +96,17 @@ void ast_dump(Node* root, int depth) {
       if (root->c.elnode)
         ast_dump(root->c.elnode, depth+2);
       break;
+    case EXPR_CALL:
+      depth_pad(depth + 1);
+      puts("Name: ");
+      if (root->f.name)
+        ast_dump(root->f.name, depth+2);
+
+      depth_pad(depth + 1);
+      puts("Arguments: ");
+      if (root->f.args)
+        ast_dump(root->f.args, depth+2);
+      break;
     default: break;
   }
   return;
@@ -136,6 +149,12 @@ void ast_destroy(Node* root) {
       if (root->c.elnode)
         ast_destroy(root->c.elnode);
       free(root);
+      break;
+    case EXPR_CALL:
+      if (root->f.name)
+        ast_destroy(root->f.name);
+      if (root->f.args)
+        ast_destroy(root->f.args);
       break;
     default: break;
   }

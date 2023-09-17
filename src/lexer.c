@@ -11,6 +11,7 @@
 #include "qcc/initalloc.h"
 
 #define NEXT(ptr) (*((ptr) + 1))
+#define PREV(ptr) (*((ptr) - 1))
 #define IS_NUMCONST(ptr) \
   (isdigit(*ptr) || (*ptr == '.' && isdigit(NEXT(ptr))))
 #define IS_IDENT0(c) (isalpha(c) || c == '_')
@@ -354,7 +355,7 @@ static Token* lexer_internal(Lexer* lexer) {
     // TODO: tokenize str/char const & wide unicode
 
     // tokenize numeric constants
-    if (IS_NUMCONST(source->cursor))
+    if (!isalpha(PREV(source->cursor)) && IS_NUMCONST(source->cursor))
       return lexer_numconst(source);
 
     // tokenize identifiers or keywords
@@ -436,9 +437,12 @@ Token* lexer_get(Lexer* lexer) {
 
     tok = lexer_internal(lexer);
     if (tok->kind == TOKEN_EOF) {
-      source_destroy(
-        list_fpop(&lexer->sources)
-      );
+      source = (Source *)list_fpop(&lexer->sources);
+      if (source != (Source *)-1) {
+        source_destroy(
+          list_fpop(&lexer->sources)
+        );
+      }
     }
     return tok;
   }
@@ -456,5 +460,15 @@ Token* lexer_peek(Lexer* lexer) {
 void lexer_eat(Lexer* lexer) {
   lexer_get(lexer);
   return;
+}
+
+int lexer_advance(Lexer* lexer) {
+  Token* tok;
+  if (tok = lexer_get(lexer)) {
+    int kind = tok->kind;
+    free(tok);
+    return kind;
+  }
+  return -1;
 }
 

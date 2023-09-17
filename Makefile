@@ -5,7 +5,7 @@ SRC_DIR    = src
 HEADER_DIR = include
 
 HEADERS    = $(wildcard include/$(MAIN)/*.h)
-CFLAGS     = -D_DEFAULT_SOURCE $(DEBUG) -std=c99 -O2 -I include
+CFLAGS     = -D_DEFAULT_SOURCE $(DEBUG) -std=c99 -I include
 
 SRCS       = $(wildcard src/*.c)
 OBJS       = $(SRCS:%.c=%.o)

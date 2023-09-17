@@ -39,9 +39,6 @@ static Node* parse_expr(Parser* parser);
 static Node* parse_stmt(Parser* parser) {
 }
 
-
-
-
 // primary-expression:
 //   identifer
 //   constant
@@ -85,8 +82,8 @@ static Node* parse_primary_expr(Parser* parser) {
       case TOKEN_LPAREN:
         lexer_eat(parser->lexer);
         node = parse_expr(parser);
-        tok = lexer_get(parser->lexer);
-        if (!tok || tok->kind != TOKEN_RPAREN)
+        Token* err = lexer_get(parser->lexer);
+        if (!err || err->kind != TOKEN_RPAREN)
           logger_fatal(-1, "Unclosed parenthesis on line %d\n", tok->line);
         break;
       default: return NULL;
@@ -106,6 +103,58 @@ static Node* parse_primary_expr(Parser* parser) {
 //   --
 static Node* parse_postfix_expr(Parser* parser) {
   Node* node = parse_primary_expr(parser);
+  Token* tok;
+  if (tok = lexer_peek(parser->lexer)) {
+    switch (tok->kind) {
+      // subscript operation
+      case TOKEN_LBRACKET:
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_POSTFIX,
+          .e.op = lexer_get(parser->lexer),
+          .e.lhs = node,
+          .e.rhs = parse_expr(parser)
+        });
+        tok = lexer_get(parser->lexer);
+        if (!tok || tok->kind != TOKEN_RBRACKET) {
+          logger_fatal(-1, "Unclosed subscript on line %d\n",
+            tok->line);
+        }
+        free(tok);
+        break;
+      // function call operation
+      // TODO:
+      case TOKEN_LPAREN:
+        free(lexer_get(parser->lexer));
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_CALL,
+          .f.name = node,
+          .f.args = parse_expr(parser)
+        });
+        break;
+      case TOKEN_DOT:
+      case TOKEN_ARROW:
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_POSTFIX,
+          .e.op = lexer_get(parser->lexer),
+          .e.lhs = node,
+          .e.rhs = parse_primary_expr(parser)
+        });
+        if (node->e.rhs->e.op->kind != TOKEN_IDENTIFIER) {
+          logger_fatal(-1, "Member access not an identifier on line %d\n",
+            node->e.rhs->e.op->line);
+        }
+        break;
+      case TOKEN_INC:
+      case TOKEN_DEC:
+        node = INIT_ALLOC(Node, {
+          .kind = EXPR_POSTFIX,
+          .e.op = lexer_get(parser->lexer),
+          .e.lhs = node
+        });
+        break;
+      default: break;
+    }
+  }
   return node;
 }
 
@@ -323,9 +372,9 @@ static Node* parse_assign_expr(Parser* parser) {
 static Node* parse_expr(Parser* parser) {
   Node* node = parse_assign_expr(parser);
   Token* tok;
+  //TODO: broken
   while (tok = lexer_peek(parser->lexer)) {
     if (tok->kind == TOKEN_COMMA) {
-      lexer_eat(parser->lexer);
       node = INIT_ALLOC(Node, {
         .kind = EXPR_BINARY,
         .e.op = lexer_get(parser->lexer),

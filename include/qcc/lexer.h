@@ -33,4 +33,7 @@ Token* lexer_peek(Lexer* lexer);
 
 /* eat cache or literal token */
 void lexer_eat(Lexer* lexer);
+
+/* eat and return kind, no need for explicit memory management */
+int lexer_advance(Lexer* lexer);
 #endif // LEXER_H_

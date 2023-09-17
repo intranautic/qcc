@@ -16,6 +16,7 @@ struct node {
     EXPR_UNARY,
     EXPR_POSTFIX,
     // special
+    EXPR_CALL,
     EXPR_TYPECAST,
     // conditional
     EXPR_TERNARY,
@@ -64,7 +65,7 @@ struct node {
     } c;
     // func
     struct {
-      Token* name;
+      Node* name;
       Node* args;
     } f;
     // constant value (no symbol)
