@@ -82,9 +82,10 @@ static Node* parse_primary_expr(Parser* parser) {
       case TOKEN_LPAREN:
         lexer_eat(parser->lexer);
         node = parse_expr(parser);
-        Token* err = lexer_get(parser->lexer);
-        if (!err || err->kind != TOKEN_RPAREN)
+        Token* closing = lexer_get(parser->lexer);
+        if (!closing || closing->kind != TOKEN_RPAREN)
           logger_fatal(-1, "Unclosed parenthesis on line %d\n", tok->line);
+        free(closing);
         break;
       default: return NULL;
     }
@@ -123,14 +124,7 @@ static Node* parse_postfix_expr(Parser* parser) {
         break;
       // function call operation
       // TODO:
-      case TOKEN_LPAREN:
-        free(lexer_get(parser->lexer));
-        node = INIT_ALLOC(Node, {
-          .kind = EXPR_CALL,
-          .f.name = node,
-          .f.args = parse_expr(parser)
-        });
-        break;
+      case TOKEN_LPAREN: break;
       case TOKEN_DOT:
       case TOKEN_ARROW:
         node = INIT_ALLOC(Node, {
@@ -152,7 +146,8 @@ static Node* parse_postfix_expr(Parser* parser) {
           .e.lhs = node
         });
         break;
-      default: break;
+      default: token_dump(tok);
+        break;
     }
   }
   return node;

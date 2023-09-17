@@ -355,7 +355,7 @@ static Token* lexer_internal(Lexer* lexer) {
     // TODO: tokenize str/char const & wide unicode
 
     // tokenize numeric constants
-    if (!isalpha(PREV(source->cursor)) && IS_NUMCONST(source->cursor))
+    if (IS_NUMCONST(source->cursor))
       return lexer_numconst(source);
 
     // tokenize identifiers or keywords
@@ -425,7 +425,7 @@ int lexer_register(Lexer* lexer, Source* source) {
 
 Token* lexer_get(Lexer* lexer) {
   Token* tok;
-  if (lexer && list_length(lexer->sources) > 0) {
+  if (lexer && lexer->sources) {
     if (lexer->cache) {
       tok = lexer->cache;
       lexer->cache = NULL;
@@ -438,11 +438,8 @@ Token* lexer_get(Lexer* lexer) {
     tok = lexer_internal(lexer);
     if (tok->kind == TOKEN_EOF) {
       source = (Source *)list_fpop(&lexer->sources);
-      if (source != (Source *)-1) {
-        source_destroy(
-          list_fpop(&lexer->sources)
-        );
-      }
+      if (source != (Source *)-1)
+        source_destroy(source);
     }
     return tok;
   }
@@ -458,7 +455,7 @@ Token* lexer_peek(Lexer* lexer) {
 }
 
 void lexer_eat(Lexer* lexer) {
-  lexer_get(lexer);
+  free(lexer_get(lexer));
   return;
 }
 

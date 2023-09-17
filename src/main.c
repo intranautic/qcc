@@ -8,7 +8,7 @@ int main(int argc, const char** argv) {
   if (argv[1]) {
     Unit* unit = unit_create();
     if (unit_register(unit, argv[1]) == -1)
-      puts("could not register file");
+      return puts("could not register file");
     unit_compile(unit);
     unit_destroy(unit);
   }
