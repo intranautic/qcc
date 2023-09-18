@@ -318,6 +318,7 @@ static Node* parse_cond_expr(Parser* parser) {
     tok = lexer_get(parser->lexer);
     if (!tok || tok->kind != TOKEN_COLON)
       logger_fatal(-1, "Invalid ternary expression at line %d\n", tok->line);
+    free(tok);
 
     node = INIT_ALLOC(Node, {
       .kind = NODE_TERNARY,
