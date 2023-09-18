@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stddef.h>
 #include "qcc/type.h"
 #include "qcc/initalloc.h"
@@ -22,6 +23,8 @@ Type* pred_double = &(Type) {.kind = TYPE_DOUBLE, .align = 8, .size = 8};
 Type* pred_ldouble = &(Type) {.kind = TYPE_LDOUBLE, .align = 8, .size = 8};
 
 /* --- public type api --- */
+void type_destroy(Type* type) {}
+
 bool type_ischar(Type* type) { return type->kind == TYPE_CHAR; }
 bool type_isshort(Type* type) { return type->kind == TYPE_SHORT; }
 bool type_isint(Type* type) { return type->kind == TYPE_INTEGER; }
@@ -38,9 +41,6 @@ bool type_isnum(Type* type) {
 
 bool type_isptr(Type* type) { return type->kind == TYPE_POINTER; }
 
-Type* type_create(int kind, int size, int align) {}
-void type_destroy(Type* type) {}
-
 Type* type_ptrto(Type* type) {
   // ptr size determined by platform arch, keep 0 for now
   return (type)
@@ -48,13 +48,13 @@ Type* type_ptrto(Type* type) {
       .kind = TYPE_POINTER,
       .size = 0,
       .align = 0,
-      .ty_pointer = type
+      .ty_ptr = type
     })
     : NULL;
 }
 
 Type* type_ptrfrom(Type* type) {
-  return (type_isptr(type)) ? type->ty_pointer : NULL;
+  return (type_isptr(type)) ? type->ty_ptr : NULL;
 }
 
 Type* type_array(Type* type, int length) {
@@ -68,3 +68,51 @@ Type* type_array(Type* type, int length) {
     })
     : NULL;
 }
+
+static const char* kind_tostr(int kind) {
+  if (kind & TYPE_CHAR)
+    return "TYPE_CHAR";
+  if (kind & TYPE_SHORT)
+    return "TYPE_SHORT";
+  if (kind & TYPE_INTEGER)
+    return "TYPE_INTEGER";
+  if (kind & TYPE_LONG)
+    return "TYPE_LONG";
+  if (kind & TYPE_FLOAT)
+    return "TYPE_FLOAT";
+  if (kind & TYPE_DOUBLE)
+    return "TYPE_DOUBLE";
+  if (kind & TYPE_LDOUBLE)
+    return "TYPE_LDOUBLE";
+  if (kind & TYPE_ARRAY)
+    return "TYPE_ARRAY";
+  if (kind & TYPE_STRUCT)
+    return "TYPE_STRUCT";
+  if (kind & TYPE_UNION)
+    return "TYPE_UNION";
+  if (kind & TYPE_ENUM)
+    return "TYPE_ENUM";
+  if (kind & TYPE_POINTER)
+    return "TYPE_POINTER";
+  if (kind & TYPE_FUNCTION)
+    return "TYPE_FUNCTION";
+  if (kind & TYPE_VOID)
+    return "TYPE_VOID";
+  if (kind & TYPE_BOOL)
+    return "TYPE_BOOL";
+  return "TYPE_ERROR";
+}
+
+
+void type_dump(Type* type) {
+  if (!type)
+    return;
+  printf("Type {\n\tkind: %s\n\tsize: %d\n\talign: %d\n\tsign: %d\n}\n",
+    kind_tostr(type->kind),
+    type->size,
+    type->align,
+    type->sign
+  );
+  return;
+}
+

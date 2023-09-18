@@ -53,9 +53,14 @@ static Node* parse_primary_expr(Parser* parser) {
       case TOKEN_LSTRING: break;
       // TODO: perform lookup in symbol table once decl and types are done
       case TOKEN_IDENTIFIER:
+        tok = lexer_get(parser->lexer);
+        Symbol* sym = scope_lookup(parser->tabref->current, tok);
+        if (!sym)
+          logger_fatal(-1, "Undeclared identifier on line %d\n", tok->line);
+
         node = INIT_ALLOC(Node, {
           .kind = NODE_IDENT,
-          .ident = lexer_get(parser->lexer)
+          .symbol = sym
         });
         break;
       case TOKEN_LCHAR:

@@ -51,8 +51,8 @@ struct type {
     TYPE_ENUM     = 1 << 11,
     TYPE_POINTER  = 1 << 12,
     TYPE_FUNCTION = 1 << 13,
-    TYPE_VOID,
-    TYPE_BOOL
+    TYPE_VOID     = 1 << 14,
+    TYPE_BOOL     = 1 << 15
   } kind;
   int size;
   int align;
@@ -80,11 +80,13 @@ struct type {
       bool is_flexible;
       bool is_anon;
       Field* fields;
-    } ty_struct_or_union;
+    } ty_comp;
 
-    Type* ty_pointer;
+    Type* ty_ptr;
   };
 };
+
+void type_destroy(Type* type);
 
 /* helper functions, check attributes of types */
 bool type_ischar(Type* type);
@@ -94,9 +96,6 @@ bool type_islong(Type* type);
 bool type_isunsign(Type* type);
 bool type_isnum(Type* type);
 
-/* type constructor/destructor apis, construct from predicates */
-Type* type_create(int kind, int size, int align);
-void type_destroy(Type* type);
 /* reference and dereference type */
 Type* type_ptrto(Type* type);
 Type* type_ptrfrom(Type* type);
@@ -111,6 +110,9 @@ Type* type_func(void);
 /* type checking functionality, check if two types are compatible*/
 int type_iseq(Type* t1, Type* t2);
 
-/* type conversion for arithmetic, return common type */
+/* type conversion for arithmetic */
 Type* type_common(Type* t1, Type* t2);
+
+/* debugging for types */
+void type_dump(Type* type);
 #endif // TYPE_H_

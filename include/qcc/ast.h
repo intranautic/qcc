@@ -50,6 +50,7 @@ struct node {
     // initializer
     NODE_INITIALIZER
   } kind;
+  // expressions
   union {
     // expr
     struct {
@@ -63,7 +64,7 @@ struct node {
       Node* ifnode;
       Node* elnode;
     } c;
-    // func
+    // function call
     struct {
       Node* name;
       Node* args;
@@ -78,10 +79,11 @@ struct node {
       Node* expr;
       Node* next;
     } s;
-    // reference to declaration
-    Symbol* decl;
-    Token* ident;
   };
+  // stmt/decl
+  Node* body;
+  Node* next;
+  Symbol* symbol;
 };
 
 /* recursively dump tree */
@@ -90,5 +92,5 @@ void ast_dump(Node* root, int depth);
 void ast_destroy(Node* root);
 
 /* premature optimization on ast */
-int ast_constfold(Node* root);
+void ast_fold(Node* root);
 #endif // AST_H_
