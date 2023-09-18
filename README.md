@@ -47,7 +47,7 @@ For the unit tests, there is a tool provided which automatically tests the
 project. To do so run the following command.
 
 ```sh
-./tools/run_tests.sh
+make tests
 ```
 
 ## License

@@ -54,27 +54,27 @@ static Node* parse_primary_expr(Parser* parser) {
       // TODO: perform lookup in symbol table once decl and types are done
       case TOKEN_IDENTIFIER:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_IDENT,
+          .kind = NODE_IDENT,
           .ident = lexer_get(parser->lexer)
         });
         break;
       case TOKEN_LCHAR:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_CONST,
+          .kind = NODE_CONST,
           .v.type = pred_char,
           .v.value = lexer_get(parser->lexer)
         });
         break;
       case TOKEN_LINTEGER:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_CONST,
+          .kind = NODE_CONST,
           .v.type = pred_long,
           .v.value = lexer_get(parser->lexer)
         });
         break;
       case TOKEN_LFLOAT:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_CONST,
+          .kind = NODE_CONST,
           .v.type = pred_double,
           .v.value = lexer_get(parser->lexer)
         });
@@ -87,7 +87,10 @@ static Node* parse_primary_expr(Parser* parser) {
           logger_fatal(-1, "Unclosed parenthesis on line %d\n", tok->line);
         free(closing);
         break;
-      default: return NULL;
+      default:
+        logger_error("Invalid token on line: %d\n", tok->line);
+        token_dump(tok);
+        return NULL;
     }
   }
   return node;
@@ -110,7 +113,7 @@ static Node* parse_postfix_expr(Parser* parser) {
       // subscript operation
       case TOKEN_LBRACKET:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_POSTFIX,
+          .kind = NODE_POSTFIX,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_expr(parser)
@@ -128,7 +131,7 @@ static Node* parse_postfix_expr(Parser* parser) {
       case TOKEN_DOT:
       case TOKEN_ARROW:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_POSTFIX,
+          .kind = NODE_POSTFIX,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_primary_expr(parser)
@@ -141,13 +144,12 @@ static Node* parse_postfix_expr(Parser* parser) {
       case TOKEN_INC:
       case TOKEN_DEC:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_POSTFIX,
+          .kind = NODE_POSTFIX,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = node
         });
         break;
-      default: token_dump(tok);
-        break;
+      default: break;
     }
   }
   return node;
@@ -178,7 +180,7 @@ static Node* parse_unary_expr(Parser* parser) {
       case TOKEN_SUB:
       case TOKEN_BNOT:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_UNARY,
+          .kind = NODE_UNARY,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = parse_unary_expr(parser)
         });
@@ -205,7 +207,7 @@ static Node* parse_binary_expr2(Parser* parser) {
       case TOKEN_DIV:
       case TOKEN_MOD:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_BINARY,
+          .kind = NODE_BINARY,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_unary_expr(parser)
@@ -225,7 +227,7 @@ static Node* parse_binary_expr(Parser* parser) {
       case TOKEN_ADD:
       case TOKEN_SUB:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_BINARY,
+          .kind = NODE_BINARY,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_binary_expr2(parser)
@@ -249,7 +251,7 @@ static Node* parse_relational_expr(Parser* parser) {
       case TOKEN_LTE:
       case TOKEN_GTE:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_BINARY,
+          .kind = NODE_BINARY,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_binary_expr(parser)
@@ -272,7 +274,7 @@ static Node* parse_bitwise_expr(Parser* parser) {
       case TOKEN_BLSHIFT:
       case TOKEN_BRSHIFT:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_BINARY,
+          .kind = NODE_BINARY,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_relational_expr(parser)
@@ -293,7 +295,7 @@ static Node* parse_logic_expr(Parser* parser) {
       case TOKEN_LAND:
       case TOKEN_LNOT:
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_BINARY,
+          .kind = NODE_BINARY,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_bitwise_expr(parser)
@@ -318,7 +320,7 @@ static Node* parse_cond_expr(Parser* parser) {
       logger_fatal(-1, "Invalid ternary expression at line %d\n", tok->line);
 
     node = INIT_ALLOC(Node, {
-      .kind = EXPR_TERNARY,
+      .kind = NODE_TERNARY,
       .c.cond = node,
       .c.ifnode = lhs,
       .c.elnode = parse_cond_expr(parser)
@@ -350,7 +352,7 @@ static Node* parse_assign_expr(Parser* parser) {
       case TOKEN_ASGN_BRSHIFT:
         lexer_eat(parser->lexer);
         node = INIT_ALLOC(Node, {
-          .kind = EXPR_ASSIGN,
+          .kind = NODE_ASSIGN,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_assign_expr(parser)
@@ -371,7 +373,7 @@ static Node* parse_expr(Parser* parser) {
   while (tok = lexer_peek(parser->lexer)) {
     if (tok->kind == TOKEN_COMMA) {
       node = INIT_ALLOC(Node, {
-        .kind = EXPR_BINARY,
+        .kind = NODE_BINARY,
         .e.op = lexer_get(parser->lexer),
         .e.lhs = node,
         .e.rhs = parse_assign_expr(parser)

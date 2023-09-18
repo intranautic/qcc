@@ -30,5 +30,5 @@ int unit_register(Unit* unit, const char* file) {
 
 int unit_compile(Unit* unit) {
   unit->tree = parser_run(unit->parser);
-//  ast_dump(unit->tree, 0);
+  ast_dump(unit->tree, 0);
 }

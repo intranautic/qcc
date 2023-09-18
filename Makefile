@@ -27,7 +27,10 @@ clean:
 debug: clean
 	$(MAKE) all DEBUG=-DQCC_DEBUG
 
+tests:
+	@echo 'TODO: implement unit tests'
+
 format:
 	clang-format -i $(SRCS) $(HEADERS)
 
-.PHONY: debug clean format
+.PHONY: clean debug tests format

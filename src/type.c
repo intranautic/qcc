@@ -21,7 +21,6 @@ Type* pred_float = &(Type) {.kind = TYPE_FLOAT, .align = 4, .size = 4};
 Type* pred_double = &(Type) {.kind = TYPE_DOUBLE, .align = 8, .size = 8};
 Type* pred_ldouble = &(Type) {.kind = TYPE_LDOUBLE, .align = 8, .size = 8};
 
-
 /* --- public type api --- */
 bool type_ischar(Type* type) { return type->kind == TYPE_CHAR; }
 bool type_isshort(Type* type) { return type->kind == TYPE_SHORT; }
@@ -39,7 +38,7 @@ bool type_isnum(Type* type) {
 
 bool type_isptr(Type* type) { return type->kind == TYPE_POINTER; }
 
-Type* type_construct(int size, int align) {}
+Type* type_create(int kind, int size, int align) {}
 void type_destroy(Type* type) {}
 
 Type* type_ptrto(Type* type) {

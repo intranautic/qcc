@@ -11,38 +11,38 @@ static void depth_pad(int n) {
 
 void ast_dump(Node* root, int depth) {
   static const char* ast_map[] = {
-    [EXPR_ASSIGN] = "EXPR_ASSIGN:",
-    [EXPR_BINARY] = "EXPR_BINARY:",
-    [EXPR_UNARY] = "EXPR_UNARY:",
-    [EXPR_POSTFIX] = "EXPR_POSTFIX:",
-    [EXPR_CALL] = "EXPR_CALL:",
-    [EXPR_TYPECAST] = "EXPR_TYPECAST",
-    [EXPR_TERNARY] = "EXPR_TERNARY:",
-    [EXPR_CONST] = "EXPR_CONST:",
-    [EXPR_STRING] = "EXPR_STRING:",
-    [EXPR_IDENT] = "EXPR_IDENT:",
-    [STMT_BLOCK] = "STMT_BLOCK:",
-    [STMT_LABEL] = "STMT_LABEL:",
-    [STMT_EXPR] = "STMT_EXPR:",
-    [STMT_IF] = "STMT_IF:",
-    [STMT_ELSE] = "STMT_ELSE:",
-    [STMT_WHILE] = "STMT_WHILE:",
-    [STMT_FOR] = "STMT_FOR:",
-    [STMT_DO] = "STMT_DO:",
-    [STMT_SWITCH] = "STMT_SWITCH:",
-    [STMT_CASE] = "STMT_CASE:",
-    [STMT_DEFAULT] = "STMT_DEFAULT:",
-    [STMT_GOTO] = "STMT_GOTO:",
-    [STMT_CONTINUE] = "STMT_CONTINUE:",
-    [STMT_BREAK] = "STMT_BREAK:",
-    [STMT_RETURN] = "STMT_RETURN:",
-    [DECL_ENUM] = "DECL_ENUM:",
-    [DECL_STRUCT] = "DECL_STRUCT:",
-    [DECL_UNION] = "DECL_UNION:",
-    [DECL_ARRAY] = "DECL_ARRAY:",
-    [DECL_VARIABLE] = "DECL_VARIABLE:",
-    [DECL_FUNCTION] = "DECL_FUNCTION:",
-    [DECL_INITIALIZER] = "DECL_INITIALIZER:"
+    [NODE_ASSIGN] = "NODE_ASSIGN:",
+    [NODE_BINARY] = "NODE_BINARY:",
+    [NODE_UNARY] = "NODE_UNARY:",
+    [NODE_POSTFIX] = "NODE_POSTFIX:",
+    [NODE_CALL] = "NODE_CALL:",
+    [NODE_TYPECAST] = "NODE_TYPECAST",
+    [NODE_TERNARY] = "NODE_TERNARY:",
+    [NODE_CONST] = "NODE_CONST:",
+    [NODE_STRING] = "NODE_STRING:",
+    [NODE_IDENT] = "NODE_IDENT:",
+    [NODE_BLOCK] = "NODE_BLOCK:",
+    [NODE_LABEL] = "NODE_LABEL:",
+    [NODE_EXPR] = "NODE_EXPR:",
+    [NODE_IF] = "NODE_IF:",
+    [NODE_ELSE] = "NODE_ELSE:",
+    [NODE_WHILE] = "NODE_WHILE:",
+    [NODE_FOR] = "NODE_FOR:",
+    [NODE_DO] = "NODE_DO:",
+    [NODE_SWITCH] = "NODE_SWITCH:",
+    [NODE_CASE] = "NODE_CASE:",
+    [NODE_DEFAULT] = "NODE_DEFAULT:",
+    [NODE_GOTO] = "NODE_GOTO:",
+    [NODE_CONTINUE] = "NODE_CONTINUE:",
+    [NODE_BREAK] = "NODE_BREAK:",
+    [NODE_RETURN] = "NODE_RETURN:",
+    [NODE_ENUM] = "NODE_ENUM:",
+    [NODE_STRUCT] = "NODE_STRUCT:",
+    [NODE_UNION] = "NODE_UNION:",
+    [NODE_ARRAY] = "NODE_ARRAY:",
+    [NODE_VARIABLE] = "NODE_VARIABLE:",
+    [NODE_FUNCTION] = "NODE_FUNCTION:",
+    [NODE_INITIALIZER] = "NODE_INITIALIZER:"
   };
   if (!root)
     return;
@@ -50,20 +50,20 @@ void ast_dump(Node* root, int depth) {
   depth_pad(depth);
   puts(ast_map[root->kind]);
   switch (root->kind) {
-    case EXPR_IDENT:
+    case NODE_IDENT:
       depth_pad(depth + 1);
       printf("name: ");
       puts(root->ident->value.ident);
       break;
-    case EXPR_CONST:
+    case NODE_CONST:
       depth_pad(depth + 1);
       printf("Value: ");
       token_printlit(root->v.value);
       break;
-    case EXPR_ASSIGN:
-    case EXPR_BINARY:
-    case EXPR_UNARY:
-    case EXPR_POSTFIX:
+    case NODE_ASSIGN:
+    case NODE_BINARY:
+    case NODE_UNARY:
+    case NODE_POSTFIX:
       depth_pad(depth + 1);
       printf("Operator: %s\n", token_tostring(root->e.op->kind));
       depth_pad(depth + 1);
@@ -80,7 +80,7 @@ void ast_dump(Node* root, int depth) {
       } else // unary
         putchar(10);
       break;
-    case EXPR_TERNARY:
+    case NODE_TERNARY:
       depth_pad(depth + 1);
       puts("Condition: ");
       if (root->c.cond)
@@ -96,7 +96,7 @@ void ast_dump(Node* root, int depth) {
       if (root->c.elnode)
         ast_dump(root->c.elnode, depth+2);
       break;
-    case EXPR_CALL:
+    case NODE_CALL:
       depth_pad(depth + 1);
       puts("Name: ");
       if (root->f.name)
@@ -117,22 +117,22 @@ void ast_destroy(Node* root) {
     return;
 
   switch (root->kind) {
-    case EXPR_IDENT:
+    case NODE_IDENT:
       if (root->ident)
         token_destroy(root->ident);
       free(root);
       break;
-    case EXPR_CONST:
+    case NODE_CONST:
       if (root->v.type)
         type_destroy(root->v.type);
       if (root->v.value)
         token_destroy(root->v.value);
       free(root);
       break;
-    case EXPR_ASSIGN:
-    case EXPR_BINARY:
-    case EXPR_UNARY:
-    case EXPR_POSTFIX:
+    case NODE_ASSIGN:
+    case NODE_BINARY:
+    case NODE_UNARY:
+    case NODE_POSTFIX:
       if (root->e.op)
         token_destroy(root->e.op);
       if (root->e.lhs)
@@ -141,7 +141,7 @@ void ast_destroy(Node* root) {
         ast_destroy(root->e.rhs);
       free(root);
       break;
-    case EXPR_TERNARY:
+    case NODE_TERNARY:
       if (root->c.cond)
         ast_destroy(root->c.cond);
       if (root->c.ifnode)
@@ -150,7 +150,7 @@ void ast_destroy(Node* root) {
         ast_destroy(root->c.elnode);
       free(root);
       break;
-    case EXPR_CALL:
+    case NODE_CALL:
       if (root->f.name)
         ast_destroy(root->f.name);
       if (root->f.args)

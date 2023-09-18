@@ -95,7 +95,7 @@ bool type_isunsign(Type* type);
 bool type_isnum(Type* type);
 
 /* type constructor/destructor apis, construct from predicates */
-Type* type_construct(int size, int align);
+Type* type_create(int kind, int size, int align);
 void type_destroy(Type* type);
 /* reference and dereference type */
 Type* type_ptrto(Type* type);
