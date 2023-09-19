@@ -5,9 +5,6 @@ int main(int argc, const char** argv) {
   logger_init();
   logger_register("default", LOG_INFO, stderr);
 
-  type_dump(pred_long);
-
-/*
   if (argv[1]) {
     Unit* unit = unit_create();
     if (unit_register(unit, argv[1]) == -1)
@@ -15,7 +12,7 @@ int main(int argc, const char** argv) {
     unit_compile(unit);
     unit_destroy(unit);
   }
-*/
+
   logger_destroy();
   return 0;
 }

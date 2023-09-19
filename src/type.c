@@ -25,10 +25,10 @@ Type* pred_ldouble = &(Type) {.kind = TYPE_LDOUBLE, .align = 8, .size = 8};
 /* --- public type api --- */
 void type_destroy(Type* type) {}
 
-bool type_ischar(Type* type) { return type->kind == TYPE_CHAR; }
-bool type_isshort(Type* type) { return type->kind == TYPE_SHORT; }
-bool type_isint(Type* type) { return type->kind == TYPE_INTEGER; }
-bool type_islong(Type* type) { return type->kind == TYPE_LONG; }
+bool type_ischar(Type* type) { return type->kind & TYPE_CHAR; }
+bool type_isshort(Type* type) { return type->kind & TYPE_SHORT; }
+bool type_isint(Type* type) { return type->kind & TYPE_INTEGER; }
+bool type_islong(Type* type) { return type->kind & TYPE_LONG; }
 bool type_isunsign(Type* type) { return !type->sign; }
 bool type_isnum(Type* type) {
   return type && (
@@ -39,7 +39,7 @@ bool type_isnum(Type* type) {
   );
 }
 
-bool type_isptr(Type* type) { return type->kind == TYPE_POINTER; }
+bool type_isptr(Type* type) { return type->kind & TYPE_POINTER; }
 
 Type* type_ptrto(Type* type) {
   // ptr size determined by platform arch, keep 0 for now
@@ -107,6 +107,7 @@ static const char* kind_tostr(int kind) {
 void type_dump(Type* type) {
   if (!type)
     return;
+
   printf("Type {\n\tkind: %s\n\tsize: %d\n\talign: %d\n\tsign: %d\n}\n",
     kind_tostr(type->kind),
     type->size,

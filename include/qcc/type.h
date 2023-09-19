@@ -111,7 +111,7 @@ Type* type_func(void);
 int type_iseq(Type* t1, Type* t2);
 
 /* type conversion for arithmetic */
-Type* type_common(Type* t1, Type* t2);
+Type* type_conv(Type* t1, Type* t2);
 
 /* debugging for types */
 void type_dump(Type* type);

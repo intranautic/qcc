@@ -52,7 +52,7 @@ void token_printlit(Token* token) {
       printf("%ld\n", token->value.i);
       break;
     case TOKEN_LFLOAT:
-      printf("%lf", token->value.f);
+      printf("%lf\n", token->value.f);
     default: break;
   }
   return;

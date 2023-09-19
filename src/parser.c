@@ -5,10 +5,10 @@
 #include "qcc/logger.h"
 #include "qcc/initalloc.h"
 
-/* --- statement parser signatures --- */
-static Node* parse_stmt(Parser* parser);
 /* --- declaration parser signatures --- */
 static Node* parse_decl(Parser* parser);
+/* --- statement parser signatures --- */
+static Node* parse_stmt(Parser* parser);
 /* --- expression parser signatures --- */
 static Node* parse_primary_expr(Parser* parser);
 static Node* parse_postfix_expr(Parser* parser);
@@ -36,8 +36,7 @@ static Node* parse_expr(Parser* parser);
 //  goto ID;
 //  return [ expression];
 //  compound-statement
-static Node* parse_stmt(Parser* parser) {
-}
+static Node* parse_stmt(Parser* parser) {}
 
 // primary-expression:
 //   identifer
@@ -92,10 +91,7 @@ static Node* parse_primary_expr(Parser* parser) {
           logger_fatal(-1, "Unclosed parenthesis on line %d\n", tok->line);
         free(closing);
         break;
-      default:
-        logger_error("Invalid token on line: %d\n", tok->line);
-        token_dump(tok);
-        return NULL;
+      default: return NULL;
     }
   }
   return node;
