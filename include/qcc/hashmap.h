@@ -17,6 +17,11 @@ struct entry {
 };
 
 typedef struct hashmap Hashmap;
+struct hashmap {
+  Entry* entries;
+  size_t in_use;
+  size_t capacity;
+};
 
 /* hashing helper function */
 hash_t hashmap_hash(const char* key, size_t size);

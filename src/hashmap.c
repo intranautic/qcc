@@ -8,12 +8,6 @@
 #define FNV64_OFFSET 0xcbf29ce484222325
 #define FNV64_PRIME  0x100000001b3
 
-struct hashmap {
-  Entry* entries;
-  size_t in_use;
-  size_t capacity;
-};
-
 static hash_t fnv1a_hash64(const char* input, size_t length) {
   size_t hash = FNV64_OFFSET;
   for (int i = 0; i < length; ++i) {
