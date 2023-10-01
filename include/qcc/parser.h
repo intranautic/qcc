@@ -12,7 +12,10 @@
 typedef struct parser Parser;
 struct parser {
   Lexer* lexer;
+  /* non owning reference to symbol table, DO NOT DEALLOCATE! */
   Symtab* tabref;
+  /* reference to current local function being parsed */
+  Symbol* local;
 };
 
 /* constructor/destructor methods for parser state */

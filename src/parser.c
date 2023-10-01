@@ -5,6 +5,11 @@
 #include "qcc/logger.h"
 #include "qcc/initalloc.h"
 
+/*
+  only declarations are allowed at a global level, all statements are
+  intraprocedural. parsing in order of decl -> stmt -> expr.
+*/
+
 /* --- declaration parser signatures --- */
 static Node* parse_decl(Parser* parser);
 /* --- statement parser signatures --- */
@@ -19,24 +24,79 @@ static Node* parse_assign_expr(Parser* parser);
 static Node* parse_expr(Parser* parser);
 
 /* --- parser implementation --- */
-// statement:
-//  ID: statement
-//  case constant-expression : statement
-//  default: statement
-//  [ expression ] ;
-//  if ( expression ) statement
-//  if ( expression ) statement else statement
-//  switch ( expression ) statement
-//  while ( expression ) statement
-//  do statement while ( expression )
-//  for ( [ expression ] ; [ expression ] ; [ expression ] )
-//    statement
-//  break;
-//  continue;
-//  goto ID;
-//  return [ expression];
-//  compound-statement
-static Node* parse_stmt(Parser* parser) {}
+static Node* parse_stmt(Parser* parser) {
+  Token* tok;
+  Node* node;
+  if (tok = lexer_peek(parser->lexer)) {
+    // ID: statement
+    if (tok->kind == TOKEN_IDENTIFIER) {
+      tok = lexer_get(parser->lexer); //advance
+      if (lexer_advance(parser->lexer) != TOKEN_COLON) {
+        logger_fatal(-1, "Expected colon in label declaration on line %d\n",
+          tok->line);
+      }
+      /*
+        labels have different scoping rules than symbols
+        insert into current function labels list 
+      */
+      node = INIT_ALLOC(Node, {
+        .kind = NODE_LABEL,
+        .label = tok,
+        .next = parse_stmt(parser)
+      });
+      if (!parser->local) {
+        logger_fatal(-1, "Cannot define label at global scope on line %d\n",
+          tok->line);
+      }
+      list_fpush(&parser->local->type->ty_func.labels, node);
+    } else if (tok->kind == TOKEN_KEYWORD) {
+      switch (tok->value.keyword->kind) {
+        // if ( expr ) stmt [ else stmt ]
+        case KWRD_IF:
+          lexer_eat(parser->lexer);
+          if (lexer_advance(parser->lexer) != TOKEN_LPAREN) {
+            logger_fatal(-1, "Expected ( token after if on line %d\n",
+              tok->line);
+          }
+          node = INIT_ALLOC(Node, {
+            .kind = NODE_IF,
+            .c.cond = parse_expr(parser)
+          });
+
+          if (!node->c.cond) {
+            logger_fatal(-1, "Expected expression in if after ( on line %d\n",
+              tok->line);
+          }
+          if (lexer_advance(parser->lexer) != TOKEN_RPAREN) {
+            logger_fatal(-1, "Expected ) token after expr on line %d\n",
+              tok->line);
+          }
+
+          node->c.ifnode = parse_stmt(parser);
+          if (!node->c.ifnode) {
+            logger_fatal(-1, "Expected expr after if statement on line %d\n",
+              tok->line);
+          }
+
+          tok = lexer_peek(parser->lexer);
+          if (tok->kind == TOKEN_KEYWORD) {
+            if (tok->value.keyword->kind == KWRD_ELSE) {
+              lexer_eat(parser->lexer); //advance over else
+              node->c.elnode = parse_stmt(parser);
+            }
+          }
+        default: break;
+      }
+    } else {
+      //expression statement
+      node = parse_expr(parser);
+      if (lexer_advance(parser->lexer) != TOKEN_SEMICOLON)
+        logger_fatal(-1, "Expected semicolon after expr on line %d\n",
+          tok->line);
+    }
+  }
+  return node;
+}
 
 // primary-expression:
 //   identifer
@@ -391,6 +451,7 @@ Parser* parser_create(Lexer* lexer, Symtab* tabref) {
   Parser* parser = (Parser *)malloc(sizeof(Parser));
   parser->lexer = lexer;
   parser->tabref = tabref;
+  parser->local = NULL;
   return parser;
 }
 
@@ -400,5 +461,5 @@ void parser_destroy(Parser* parser) {
 }
 
 Node* parser_run(Parser* parser) {
-  return parse_expr(parser);
+  return parse_stmt(parser);
 }

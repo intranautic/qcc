@@ -50,7 +50,6 @@ struct node {
     // initializer
     NODE_INITIALIZER
   } kind;
-  // expressions
   union {
     // expr
     struct {
@@ -58,12 +57,6 @@ struct node {
       Node* lhs;
       Node* rhs;
     } e;
-    // control
-    struct {
-      Node* cond;
-      Node* ifnode;
-      Node* elnode;
-    } c;
     // function call
     struct {
       Node* name;
@@ -74,14 +67,15 @@ struct node {
       Type* type;
       Token* value;
     } v;
-    // statement
+    // control
     struct {
-      Node* expr;
-      Node* next;
-    } s;
+      Node* cond;
+      Node* ifnode;
+      Node* elnode;
+    } c;
   };
+  Token* label;
   // stmt/decl
-  Node* body;
   Node* next;
   Symbol* symbol;
 };

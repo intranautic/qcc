@@ -59,19 +59,24 @@ struct type {
   bool sign;
   union {
     struct {
-      Type* arrtype;
+      Type* atype;
       int length;
     } ty_array;
 
     // function type
     struct {
+      /* procedure attributes */
       bool is_inline;
       bool is_local;
       bool is_variadic;
+      /* stack size calculated after parsing params/locals */
       int stacksz;
       List* params;
       List* locals;
-      Type* return_type;
+      /* list of ast nodes of labels in local procedure */
+      List* labels;
+      /* return type of function */
+      Type* rtype;
     } ty_func;
 
     // struct/union types

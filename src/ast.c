@@ -80,21 +80,25 @@ void ast_dump(Node* root, int depth) {
       } else // unary
         putchar(10);
       break;
+    case NODE_IF:
     case NODE_TERNARY:
-      depth_pad(depth + 1);
-      puts("Condition: ");
-      if (root->c.cond)
+      if (root->c.cond) {
+        depth_pad(depth + 1);
+        puts("Condition: ");
         ast_dump(root->c.cond, depth+2);
+      }
 
-      depth_pad(depth + 1);
-      puts("Then: ");
-      if (root->c.ifnode)
+      if (root->c.ifnode) {
+        depth_pad(depth + 1);
+        puts("Then: ");
         ast_dump(root->c.ifnode, depth+2);
+      }
 
-      depth_pad(depth + 1);
-      puts("Else: ");
-      if (root->c.elnode)
+      if (root->c.elnode) {
+        depth_pad(depth + 1);
+        puts("Else: ");
         ast_dump(root->c.elnode, depth+2);
+      }
       break;
     case NODE_CALL:
       depth_pad(depth + 1);

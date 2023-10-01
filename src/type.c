@@ -103,7 +103,6 @@ static const char* kind_tostr(int kind) {
   return "TYPE_ERROR";
 }
 
-
 void type_dump(Type* type) {
   if (!type)
     return;
