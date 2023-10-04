@@ -85,14 +85,16 @@ static Node* parse_stmt(Parser* parser) {
               node->c.elnode = parse_stmt(parser);
             }
           }
-        default: break;
+          break;
+        default: return NULL;
       }
     } else {
-      //expression statement
+      //expression statement default case
       node = parse_expr(parser);
-      if (lexer_advance(parser->lexer) != TOKEN_SEMICOLON)
+      if (lexer_advance(parser->lexer) != TOKEN_SEMICOLON) {
         logger_fatal(-1, "Expected semicolon after expr on line %d\n",
           tok->line);
+      }
     }
   }
   return node;

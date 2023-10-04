@@ -63,7 +63,7 @@ Type* type_array(Type* type, int length) {
       .kind = TYPE_ARRAY,
       .size = type->size * length,
       .align = type->align,
-      .ty_array.arrtype = type,
+      .ty_array.atype = type,
       .ty_array.length = length
     })
     : NULL;
