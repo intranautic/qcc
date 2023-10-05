@@ -10,14 +10,17 @@ struct node {
   enum {
     // type node
     NODE_TYPE,
-    // expression
-    NODE_ASSIGN,
+    // expr arithmetic
     NODE_BINARY,
     NODE_UNARY,
     NODE_POSTFIX,
-    // special
+    // expr operation
+    NODE_ASSIGN,
+    NODE_ACCESS,
     NODE_CALL,
+    NODE_SUBSCRIPT,
     NODE_TYPECAST,
+    NODE_SIZEOF,
     // conditional
     NODE_TERNARY,
     // primary expressions
@@ -25,8 +28,8 @@ struct node {
     NODE_STRING,
     NODE_IDENT,
     // statement
-    NODE_BLOCK,
     NODE_LABEL,
+    NODE_BLOCK,
     NODE_EXPR,
     NODE_IF,
     NODE_ELSE,
@@ -73,11 +76,14 @@ struct node {
       Node* ifnode;
       Node* elnode;
     } c;
+    // decl
+    struct {
+      Symbol* symbol;
+      Node* body;
+    } d;
+    Token* label;
   };
-  Token* label;
-  // stmt/decl
   Node* next;
-  Symbol* symbol;
 };
 
 /* recursively dump tree */

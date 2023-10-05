@@ -11,12 +11,16 @@ static void depth_pad(int n) {
 
 void ast_dump(Node* root, int depth) {
   static const char* ast_map[] = {
-    [NODE_ASSIGN] = "NODE_ASSIGN:",
+    [NODE_TYPE] = "NODE_TYPE",
     [NODE_BINARY] = "NODE_BINARY:",
     [NODE_UNARY] = "NODE_UNARY:",
     [NODE_POSTFIX] = "NODE_POSTFIX:",
-    [NODE_CALL] = "NODE_CALL:",
+    [NODE_ASSIGN] = "NODE_ASSIGN:",
+    [NODE_ACCESS] = "NODE_ACCESS",
+    [NODE_CALL] = "NODE_CALL",
+    [NODE_SUBSCRIPT] = "NODE_SUBSCRIPT",
     [NODE_TYPECAST] = "NODE_TYPECAST",
+    [NODE_SIZEOF] = "NODE_SIZEOF",
     [NODE_TERNARY] = "NODE_TERNARY:",
     [NODE_CONST] = "NODE_CONST:",
     [NODE_STRING] = "NODE_STRING:",
@@ -100,17 +104,6 @@ void ast_dump(Node* root, int depth) {
         ast_dump(root->c.elnode, depth+2);
       }
       break;
-    case NODE_CALL:
-      depth_pad(depth + 1);
-      puts("Name: ");
-      if (root->f.name)
-        ast_dump(root->f.name, depth+2);
-
-      depth_pad(depth + 1);
-      puts("Arguments: ");
-      if (root->f.args)
-        ast_dump(root->f.args, depth+2);
-      break;
     default: break;
   }
   return;
@@ -153,13 +146,7 @@ void ast_destroy(Node* root) {
       if (root->c.elnode)
         ast_destroy(root->c.elnode);
       free(root);
-      break;
-    case NODE_CALL:
-      if (root->f.name)
-        ast_destroy(root->f.name);
-      if (root->f.args)
-        ast_destroy(root->f.args);
-      break;
+      break; 
     default: break;
   }
   return;

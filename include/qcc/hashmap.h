@@ -8,6 +8,7 @@
 #include "qcc/list.h"
 
 #define HASHMAP_DEFAULT (1 << 4)
+#define HASHMAP_TOMB ((void *)(-1))
 
 typedef unsigned long hash_t;
 typedef struct entry Entry;

@@ -9,7 +9,6 @@
   only declarations are allowed at a global level, all statements are
   intraprocedural. parsing in order of decl -> stmt -> expr.
 */
-
 /* --- declaration parser signatures --- */
 static Node* parse_decl(Parser* parser);
 /* --- statement parser signatures --- */
@@ -28,28 +27,8 @@ static Node* parse_stmt(Parser* parser) {
   Token* tok;
   Node* node;
   if (tok = lexer_peek(parser->lexer)) {
-    // ID: statement
-    if (tok->kind == TOKEN_IDENTIFIER) {
-      tok = lexer_get(parser->lexer); //advance
-      if (lexer_advance(parser->lexer) != TOKEN_COLON) {
-        logger_fatal(-1, "Expected colon in label declaration on line %d\n",
-          tok->line);
-      }
-      /*
-        labels have different scoping rules than symbols
-        insert into current function labels list 
-      */
-      node = INIT_ALLOC(Node, {
-        .kind = NODE_LABEL,
-        .label = tok,
-        .next = parse_stmt(parser)
-      });
-      if (!parser->local) {
-        logger_fatal(-1, "Cannot define label at global scope on line %d\n",
-          tok->line);
-      }
-      list_fpush(&parser->local->type->ty_func.labels, node);
-    } else if (tok->kind == TOKEN_KEYWORD) {
+    // handle basic stmts
+    if (tok->kind == TOKEN_KEYWORD) {
       switch (tok->value.keyword->kind) {
         // if ( expr ) stmt [ else stmt ]
         case KWRD_IF:
@@ -88,10 +67,12 @@ static Node* parse_stmt(Parser* parser) {
           break;
         default: return NULL;
       }
-    } else {
-      //expression statement default case
+    }
+    else {
+      // expression statement default case
       node = parse_expr(parser);
-      if (lexer_advance(parser->lexer) != TOKEN_SEMICOLON) {
+
+      if (node && lexer_advance(parser->lexer) != TOKEN_SEMICOLON) {
         logger_fatal(-1, "Expected semicolon after expr on line %d\n",
           tok->line);
       }
@@ -194,7 +175,7 @@ static Node* parse_postfix_expr(Parser* parser) {
       case TOKEN_DOT:
       case TOKEN_ARROW:
         node = INIT_ALLOC(Node, {
-          .kind = NODE_POSTFIX,
+          .kind = NODE_ACCESS,
           .e.op = lexer_get(parser->lexer),
           .e.lhs = node,
           .e.rhs = parse_primary_expr(parser)

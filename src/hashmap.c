@@ -4,6 +4,8 @@
 #include "qcc/hashmap.h"
 
 #define HASHMAP_THRESH(size) (size <= (1ul << 63))
+#define HASHMAP_DEAD(key) (key == HASHMAP_TOMB)
+#define HASHMAP_ACTIVE(key) (key && !HASHMAP_DEAD(key))
 
 #define FNV64_OFFSET 0xcbf29ce484222325
 #define FNV64_PRIME  0x100000001b3
@@ -43,7 +45,7 @@ int hashmap_grow(Hashmap* hashmap) {
     hashmap->entries = calloc(1, hashmap->capacity * sizeof(Entry));
     // rehash each entry by insert
     for (size_t i = 0; i < tmp.capacity; ++i) {
-      if (tmp.entries[i].key)
+      if (HASHMAP_ACTIVE(tmp.entries[i].key))
         hashmap_insert(hashmap, &tmp.entries[i]);
     }
     // reset hashmap in_use, since insert api increments
@@ -75,8 +77,11 @@ int hashmap_insert(Hashmap* hashmap, Entry* entry) {
 
     index = hashmap_hash(entry->key, hashmap->capacity);
     while (hashmap->entries[index].key) {
-      if (!strcmp(hashmap->entries[index].key, entry->key))
-        return index; // already exists
+      // if not tombstone and equal
+      if (!HASHMAP_DEAD(hashmap->entries[index].key)) {
+        if (!strcmp(hashmap->entries[index].key, entry->key))
+          return index; // already exists
+      }
       index = (index + 1) % hashmap->capacity;
     }
     // shallow copy, dont hold ref to object since could be stack alloc'd
@@ -91,13 +96,16 @@ int hashmap_remove(Hashmap* hashmap, const char* key) {
   if (hashmap) {
     index = hashmap_hash(key, hashmap->capacity);
     while (hashmap->entries[index].key) {
-      if (!strcmp(hashmap->entries[index].key, key)) {
-        hashmap->entries[index] = (Entry) {
-          .key = 0,
-          .value = 0
-        };
-        hashmap->in_use--;
-        return index;
+      // if not tombstone and equal
+      if (!HASHMAP_DEAD(hashmap->entries[index].key)) {
+        if (!strcmp(hashmap->entries[index].key, key)) {
+          hashmap->entries[index] = (Entry) {
+            .key = HASHMAP_TOMB,
+            .value = 0
+          };
+          hashmap->in_use--;
+          return index;
+        } 
       }
       index = (index + 1) % hashmap->capacity;
     }
@@ -114,8 +122,9 @@ Entry* hashmap_nretrieve(Hashmap* hashmap, const char* key, size_t length) {
   if (hashmap) {
     index = hashmap_nhash(key, hashmap->capacity, length);
     while (hashmap->entries[index].key) {
-      if (!strncmp(hashmap->entries[index].key, key, length)) {
-        return &hashmap->entries[index];
+      if (!HASHMAP_DEAD(hashmap->entries[index].key)) {
+        if (!strncmp(hashmap->entries[index].key, key, length))
+          return &hashmap->entries[index];
       }
       index = (index + 1) % hashmap->capacity;
     }
@@ -130,7 +139,7 @@ List* hashmap_enumerate(Hashmap* hashmap) {
     entries = NULL;
 
     for (size_t i = 0; i < hashmap->capacity; ++i) {
-      if (hashmap->entries[i].key)
+      if (HASHMAP_ACTIVE(hashmap->entries[i].key))
         list_fpush(&entries, &hashmap->entries[i].key);
     }
     return entries;
