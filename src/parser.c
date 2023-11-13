@@ -65,6 +65,16 @@ static Node* parse_stmt(Parser* parser) {
             }
           }
           break;
+        case KWRD_CASE:
+        case KWRD_DEFAULT:
+        case KWRD_SWITCH:
+        case KWRD_WHILE:
+        case KWRD_DO:
+        case KWRD_FOR:
+        case KWRD_BREAK:
+        case KWRD_CONTINUE:
+        case KWRD_GOTO:
+        case KWRD_RETURN:
         default: return NULL;
       }
     }
@@ -96,13 +106,13 @@ static Node* parse_primary_expr(Parser* parser) {
       // TODO: perform lookup in symbol table once decl and types are done
       case TOKEN_IDENTIFIER:
         tok = lexer_get(parser->lexer);
-        Symbol* sym = scope_lookup(parser->tabref->current, tok);
-        if (!sym)
+        Symbol* symref = scope_lookup(parser->tabref->current, tok);
+        if (!symref)
           logger_fatal(-1, "Undeclared identifier on line %d\n", tok->line);
 
         node = INIT_ALLOC(Node, {
           .kind = NODE_IDENT,
-          .symbol = sym
+          .s.symbol = symref
         });
         break;
       case TOKEN_LCHAR:

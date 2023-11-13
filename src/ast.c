@@ -57,7 +57,7 @@ void ast_dump(Node* root, int depth) {
     case NODE_IDENT:
       depth_pad(depth + 1);
       printf("name: ");
-      puts(root->symbol->ident->value.ident);
+      puts(root->s.symbol->ident->value.ident);
       break;
     case NODE_CONST:
       depth_pad(depth + 1);
@@ -115,8 +115,8 @@ void ast_destroy(Node* root) {
 
   switch (root->kind) {
     case NODE_IDENT:
-      if (root->symbol)
-        symbol_destroy(root->symbol);;
+      if (root->s.symbol)
+        symbol_destroy(root->s.symbol);
       free(root);
       break;
     case NODE_CONST:

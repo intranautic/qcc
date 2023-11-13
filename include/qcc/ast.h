@@ -76,11 +76,11 @@ struct node {
       Node* ifnode;
       Node* elnode;
     } c;
-    // decl
+    // symbol or decl
     struct {
       Symbol* symbol;
       Node* body;
-    } d;
+    } s;
     Token* label;
   };
   Node* next;

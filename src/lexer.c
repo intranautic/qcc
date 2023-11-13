@@ -260,13 +260,6 @@ static Token* lexer_identifier(Source* source) {
     .line = source->line,
     .value.ident = strndup(origin, source->cursor-origin)
   });
-
-  return token_create(
-      TOKEN_IDENTIFIER,
-      origin,
-      source->line,
-      (++source->cursor-origin) - 1
-    );
 }
 
 static Token* lexer_charconst(Source* source, encoding_t encoding) {}
