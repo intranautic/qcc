@@ -3,7 +3,7 @@
 
 #include "qcc/hashmap.h"
 
-#define HASHMAP_THRESH(size) (size <= (1ul << 63))
+#define HASHMAP_THRESH(size) (size <= HASHMAP_LIMIT)
 #define HASHMAP_DEAD(key) (key == HASHMAP_TOMB)
 #define HASHMAP_ACTIVE(key) (key && !HASHMAP_DEAD(key))
 
@@ -41,15 +41,14 @@ int hashmap_grow(Hashmap* hashmap) {
 
   if (HASHMAP_THRESH(hashmap->capacity << 1)) {
     Hashmap tmp = *hashmap;
-    hashmap->capacity <<= 1;
+    hashmap->in_use = 0;
+    hashmap->capacity <<= 1; 
     hashmap->entries = calloc(1, hashmap->capacity * sizeof(Entry));
     // rehash each entry by insert
     for (size_t i = 0; i < tmp.capacity; ++i) {
-      if (HASHMAP_ACTIVE(tmp.entries[i].key))
+      if (HASHMAP_ACTIVE(tmp.entries[i].key)) 
         hashmap_insert(hashmap, &tmp.entries[i]);
     }
-    // reset hashmap in_use, since insert api increments
-    hashmap->in_use = tmp.in_use;
     // destroy old map
     free(tmp.entries);
     return hashmap->capacity; // return new capacity if ok
@@ -80,13 +79,14 @@ int hashmap_insert(Hashmap* hashmap, Entry* entry) {
       // if not tombstone and equal
       if (!HASHMAP_DEAD(hashmap->entries[index].key)) {
         if (!strcmp(hashmap->entries[index].key, entry->key))
-          return index; // already exists
+          return index; // already exists 
       }
       index = (index + 1) % hashmap->capacity;
     }
     // shallow copy, dont hold ref to object since could be stack alloc'd
     hashmap->entries[index] = *entry;
     hashmap->in_use++;
+    return index;
   }
   return -1;
 }
@@ -97,13 +97,14 @@ int hashmap_remove(Hashmap* hashmap, const char* key) {
     index = hashmap_hash(key, hashmap->capacity);
     while (hashmap->entries[index].key) {
       // if not tombstone and equal
+      // tomb evicts entry slot, does not decrement size
+      // required for correct dynamic resizing
       if (!HASHMAP_DEAD(hashmap->entries[index].key)) {
         if (!strcmp(hashmap->entries[index].key, key)) {
           hashmap->entries[index] = (Entry) {
             .key = HASHMAP_TOMB,
             .value = 0
           };
-          hashmap->in_use--;
           return index;
         } 
       }
@@ -133,6 +134,7 @@ Entry* hashmap_nretrieve(Hashmap* hashmap, const char* key, size_t length) {
   return 0;
 }
 
+// order is not guaranteed, performs linear scan over hashmap
 List* hashmap_enumerate(Hashmap* hashmap) {
   List* entries;
   if (hashmap && hashmap->in_use > 0) {
@@ -140,7 +142,7 @@ List* hashmap_enumerate(Hashmap* hashmap) {
 
     for (size_t i = 0; i < hashmap->capacity; ++i) {
       if (HASHMAP_ACTIVE(hashmap->entries[i].key))
-        list_fpush(&entries, &hashmap->entries[i].key);
+        list_fpush(&entries, &hashmap->entries[i]);
     }
     return entries;
   }

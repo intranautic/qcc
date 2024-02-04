@@ -399,12 +399,15 @@ Lexer* lexer_create(void) {
 }
 
 void lexer_destroy(Lexer* lexer) {
+  Source* tmp = 0;
   if (lexer) {
     if (lexer->cache)
       token_destroy(lexer->cache);
     hashmap_destroy(lexer->keywords);
     hashmap_destroy(lexer->macros);
     list_destroy(lexer->expand);
+    while ((tmp = list_fpop(&lexer->sources)) != (void *)-1)
+      source_destroy(tmp);
     free(lexer);
   }
   return;

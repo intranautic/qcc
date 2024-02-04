@@ -7,8 +7,12 @@
 
 #include "qcc/list.h"
 
-#define HASHMAP_DEFAULT (1 << 4)
-#define HASHMAP_TOMB ((void *)(-1))
+// default size 32, can increase as resize is costly
+// 48-bit virtual addr space, prevent oom dos if buggy
+// 4 page limit is good
+#define HASHMAP_LIMIT   (1ul << 13)
+#define HASHMAP_DEFAULT (1 << 5)
+#define HASHMAP_TOMB    ((void *)(-1))
 
 typedef unsigned long hash_t;
 typedef struct entry Entry;

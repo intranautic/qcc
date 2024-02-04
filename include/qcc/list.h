@@ -20,10 +20,6 @@ void* list_retrieve(List* list, int index);
 int list_fpush(List** list, void* value);
 void* list_fpop(List** list);
 
-/* push/pop operations on back of list O(n) */
-int list_push(List* list, void* value);
-void* list_pop(List* list, void* value);
-
 /* retrieve top of list */
 void* list_top(List* list);
 /* retrieve the length of the list */

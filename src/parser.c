@@ -179,8 +179,7 @@ static Node* parse_postfix_expr(Parser* parser) {
         }
         free(tok);
         break;
-      // function call operation
-      // TODO:
+      // TODO: function call operation
       case TOKEN_LPAREN: break;
       case TOKEN_DOT:
       case TOKEN_ARROW:
@@ -247,7 +246,6 @@ static Node* parse_unary_expr(Parser* parser) {
   return node;
 }
 
-// TODO: change this into an operator prec parser, this doesnt have precedence rn :(
 // binary-expression:
 //   unary-expression { binary-operator unary-expression }
 // binary-operator:

@@ -3,7 +3,6 @@
 
 #include "qcc/list.h"
 
-
 List* list_create(void* value) {
   List* list = calloc(1, sizeof(List));
   list->value = value;
@@ -92,33 +91,6 @@ void* list_fpop(List** list) {
     return value;
   }
   return (void *)-1; // failed to pop
-}
-
-int list_push(List* list, void* value) {
-  List* tmp;
-  if (list) {
-    tmp = list;
-    while (tmp->next)
-      tmp = tmp->next;
-    tmp->next = list_create(value);
-    return 0;
-  }
-  return -1;
-}
-
-void* list_pop(List* list, void* value) {
-  List* tmp;
-  void* save;
-  if (list) {
-    while (list->next->next)
-      list = list->next;
-    tmp = list->next;
-    save = tmp->value;
-    list->next = NULL;
-    free(tmp);
-    return save;
-  }
-  return (void *)-1;
 }
 
 void* list_top(List* list) {

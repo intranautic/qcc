@@ -1,7 +1,12 @@
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <assert.h>
 #include "qcc/hashmap.h"
 
-static const char* test_cases[] = {
+#define TEST_STRLEN   32
+
+static const char* test_cases[HASHMAP_DEFAULT] = {
   "PnAsOD0JdtBROoi5",
   "4bGbR2rNzxG1ZsSz",
   "z8ETfHgLnfZCLjOT",
@@ -20,44 +25,54 @@ static const char* test_cases[] = {
   "hYPR5pSGxIPmPJDy"
 };
 
-static int test_length = sizeof(test_cases)/sizeof(*test_cases);
-
-void test_hashmap_insert(Hashmap* hashmap) {
-  for (long i = 0; i < test_length; ++i) {
-    hashmap_insert(hashmap, & (Entry) {
-      .key = test_cases[i],
-      .value = (void *)i
-    });
-  }
-  assert(hashmap->in_use == test_length);
-  assert(hashmap->capacity == 16);
-
-  for (long i = 0; i < test_length; ++i)
-    assert(hashmap_retrieve(hashmap, test_cases[i]) == i);
-
-
-
-  return;
-}
-
-void test_hashmap_remove(Hashmap* hashmap) {}
-void test_hashmap_retrieve(Hashmap* hashmap) {}
-void test_hashmap_nretrieve(Hashmap* hashmap) {}
-void test_hashmap_enumerate(Hashmap* hashmap) {}
-
 int main(void) {
+  int fd = open("/dev/urandom", O_RDONLY);
+  char test_cases[HASHMAP_DEFAULT][TEST_STRLEN + 1] = {0};
+  for (int i = 0; i < HASHMAP_DEFAULT; ++i)
+    read(fd, test_cases[i], 32);
+
   Hashmap* hashmap = hashmap_create();
   assert(hashmap != NULL);
 
-  test_hashmap_insert(hashmap);
+  // test hashmap_insert insert
+  for (size_t i = 0; i < HASHMAP_DEFAULT; ++i) {
+    assert(
+      hashmap_insert(hashmap, & (Entry) {
+        .key = test_cases[i],
+        .value = (void *)i
+      }) != -1
+    );
+  }
+  assert(hashmap->in_use == HASHMAP_DEFAULT);
+  assert(hashmap->capacity == HASHMAP_DEFAULT);
 
-/*
-  test_hashmap_remove(hashmap);
-  test_hashmap_retreive(hashmap);
-  test_hashmap_nretreive(hashmap);
-  test_hashmap_enumerate(hashmap);
-  test_hashmap_grow(hashmap);
-*/
+  // test hashmap_retrieve
+  for (size_t i = 0; i < HASHMAP_DEFAULT; ++i)
+    assert((size_t) hashmap_retrieve(hashmap, test_cases[i])->value == i);
+
+  // test enumerate
+  List* entry_list = hashmap_enumerate(hashmap);
+  assert((size_t) list_length(entry_list) == HASHMAP_DEFAULT);
+  list_destroy(entry_list);
+
+  // test remove
+  for (size_t i = 0; i < HASHMAP_DEFAULT; ++i)
+    assert(hashmap_remove(hashmap, test_cases[i]) != -1);
+
+  // test grow and operation on resized hashmap
+  // hashmap should dynamically scale implicitly
+  // destroy before to prevent potential collisions
+  assert(
+    hashmap_insert(hashmap, &(Entry){
+      .key = "abcd",
+      .value = NULL
+    }) != -1
+  );
+
+  assert(hashmap->capacity == HASHMAP_DEFAULT<<1);
+  // tombstones should be evicted during hashmap growth operation
+  assert(hashmap->in_use == 1);
+  // should be no memory leaks or santitization errors
   hashmap_destroy(hashmap);
   return 0;
 }
