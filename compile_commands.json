@@ -1,0 +1,478 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/ast.o",
+      "src/ast.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/ast.c",
+    "output": "/home/luna/qcc/src/ast.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/cfg.o",
+      "src/cfg.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/cfg.c",
+    "output": "/home/luna/qcc/src/cfg.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/codegen.o",
+      "src/codegen.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/codegen.c",
+    "output": "/home/luna/qcc/src/codegen.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/config.o",
+      "src/config.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/config.c",
+    "output": "/home/luna/qcc/src/config.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/dataflow.o",
+      "src/dataflow.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/dataflow.c",
+    "output": "/home/luna/qcc/src/dataflow.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/error.o",
+      "src/error.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/error.c",
+    "output": "/home/luna/qcc/src/error.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/hashmap.o",
+      "src/hashmap.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/hashmap.c",
+    "output": "/home/luna/qcc/src/hashmap.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/keyword.o",
+      "src/keyword.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/keyword.c",
+    "output": "/home/luna/qcc/src/keyword.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/lexer.o",
+      "src/lexer.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/lexer.c",
+    "output": "/home/luna/qcc/src/lexer.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/list.o",
+      "src/list.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/list.c",
+    "output": "/home/luna/qcc/src/list.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/llir.o",
+      "src/llir.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/llir.c",
+    "output": "/home/luna/qcc/src/llir.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/logger.o",
+      "src/logger.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/logger.c",
+    "output": "/home/luna/qcc/src/logger.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/macro.o",
+      "src/macro.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/macro.c",
+    "output": "/home/luna/qcc/src/macro.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/main.o",
+      "src/main.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/main.c",
+    "output": "/home/luna/qcc/src/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/optimize.o",
+      "src/optimize.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/optimize.c",
+    "output": "/home/luna/qcc/src/optimize.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/parser.o",
+      "src/parser.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/parser.c",
+    "output": "/home/luna/qcc/src/parser.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/path.o",
+      "src/path.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/path.c",
+    "output": "/home/luna/qcc/src/path.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/preprocess.o",
+      "src/preprocess.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/preprocess.c",
+    "output": "/home/luna/qcc/src/preprocess.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/semantics.o",
+      "src/semantics.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/semantics.c",
+    "output": "/home/luna/qcc/src/semantics.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/source.o",
+      "src/source.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/source.c",
+    "output": "/home/luna/qcc/src/source.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/ssa.o",
+      "src/ssa.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/ssa.c",
+    "output": "/home/luna/qcc/src/ssa.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/symbol.o",
+      "src/symbol.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/symbol.c",
+    "output": "/home/luna/qcc/src/symbol.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/token.o",
+      "src/token.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/token.c",
+    "output": "/home/luna/qcc/src/token.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/type.o",
+      "src/type.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/type.c",
+    "output": "/home/luna/qcc/src/type.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/unicode.o",
+      "src/unicode.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/unicode.c",
+    "output": "/home/luna/qcc/src/unicode.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/unit.o",
+      "src/unit.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/unit.c",
+    "output": "/home/luna/qcc/src/unit.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/x86_backend.o",
+      "src/x86_backend.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/x86_backend.c",
+    "output": "/home/luna/qcc/src/x86_backend.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-D_DEFAULT_SOURCE",
+      "-std=c99",
+      "-I",
+      "include",
+      "-g",
+      "-c",
+      "-o",
+      "src/x86_regalloc.o",
+      "src/x86_regalloc.c"
+    ],
+    "directory": "/home/luna/qcc",
+    "file": "/home/luna/qcc/src/x86_regalloc.c",
+    "output": "/home/luna/qcc/src/x86_regalloc.o"
+  }
+]

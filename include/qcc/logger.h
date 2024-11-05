@@ -1,6 +1,7 @@
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
+#include <stdio.h>
 
 typedef struct sink Sink;
 typedef struct logger Logger;

@@ -8,6 +8,8 @@
 typedef struct node Node;
 struct node {
   enum {
+    // root node
+    NODE_PROGRAM,
     // type node
     NODE_TYPE,
     // expr arithmetic
@@ -44,6 +46,7 @@ struct node {
     NODE_BREAK,
     NODE_RETURN,
     // declarations
+    NODE_DECL,
     NODE_ENUM,
     NODE_STRUCT,
     NODE_UNION,
@@ -76,11 +79,16 @@ struct node {
       Node* ifnode;
       Node* elnode;
     } c;
-    // symbol or decl
+    // symbol
     struct {
       Symbol* symbol;
       Node* body;
     } s;
+    // declarator
+    struct {
+      Token* spec;
+      void* init; // TODO: initializer list parsing
+    } d;
     Token* label;
   };
   Node* next;

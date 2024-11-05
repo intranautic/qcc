@@ -104,6 +104,84 @@ void ast_dump(Node* root, int depth) {
         ast_dump(root->c.elnode, depth+2);
       }
       break;
+    case NODE_CALL:
+      if (root->f.name) {
+        depth_pad(depth + 1);
+        puts("Function: ");
+        ast_dump(root->f.name, depth+2);
+      }
+      if (root->f.args) {
+        depth_pad(depth + 1);
+        puts("Arguments: ");
+        ast_dump(root->f.args, depth+2);
+      }
+      break;
+    case NODE_WHILE:
+    case NODE_FOR:
+    case NODE_DO:
+      if (root->c.cond) {
+        depth_pad(depth + 1);
+        puts("Condition: ");
+        ast_dump(root->c.cond, depth+2);
+      }
+      if (root->c.ifnode) {
+        depth_pad(depth + 1);
+        puts("Ifnode: ");
+        ast_dump(root->c.ifnode, depth+2);
+      }
+      if (root->c.elnode) {
+        depth_pad(depth + 1);
+        puts("Elnode: ");
+        ast_dump(root->c.elnode, depth+2);
+      }
+      if (root->next) {
+        depth_pad(depth + 1);
+        puts("Body: ");
+        ast_dump(root->next, depth+2);
+      }
+      break;
+    case NODE_LABEL:
+    case NODE_GOTO:
+      if (root->label) {
+        depth_pad(depth + 1);
+        printf("Label: %s\n", root->label->value.ident);
+      }
+      break;
+    case NODE_BLOCK:
+      if (root->c.ifnode)
+        ast_dump(root->c.ifnode, depth+2);
+      if (root->next)
+        ast_dump(root->next, depth+2);
+      break;
+    case NODE_EXPR:
+      if (root->next) {
+        depth_pad(depth + 1);
+        puts("Statements: ");
+        ast_dump(root->next, depth+2);
+      }
+      break;
+    case NODE_VARIABLE:
+    case NODE_FUNCTION:
+    case NODE_STRUCT:
+    case NODE_UNION:
+    case NODE_ENUM:
+      if (root->s.symbol) {
+        depth_pad(depth + 1);
+        printf("Name: %s\n", root->s.symbol->ident->value.ident);
+      }
+      if (root->s.body) {
+        depth_pad(depth + 1);
+        puts("Body: ");
+        ast_dump(root->s.body, depth+2);
+      }
+      break;
+    case NODE_STRING:
+      if (root->v.value) {
+        depth_pad(depth + 1);
+        printf("Value: ");
+        token_printlit(root->v.value);
+      }
+      break;
     default: break;
   }
   return;
@@ -139,6 +217,7 @@ void ast_destroy(Node* root) {
       free(root);
       break;
     case NODE_TERNARY:
+    case NODE_IF:
       if (root->c.cond)
         ast_destroy(root->c.cond);
       if (root->c.ifnode)
@@ -146,8 +225,33 @@ void ast_destroy(Node* root) {
       if (root->c.elnode)
         ast_destroy(root->c.elnode);
       free(root);
-      break; 
-    default: break;
+      break;
+    case NODE_BLOCK:
+    case NODE_EXPR:
+    case NODE_WHILE:
+    case NODE_FOR:
+    case NODE_DO:
+    case NODE_SWITCH:
+    case NODE_CASE:
+    case NODE_DEFAULT:
+    case NODE_GOTO:
+    case NODE_CONTINUE:
+    case NODE_BREAK:
+    case NODE_RETURN:
+    case NODE_ENUM:
+    case NODE_STRUCT:
+    case NODE_UNION:
+    case NODE_ARRAY:
+    case NODE_VARIABLE:
+    case NODE_FUNCTION:
+    case NODE_INITIALIZER:
+      // Clean up any allocated resources for these nodes
+      free(root);
+      break;
+    default:
+      // Handle any unhandled node types
+      free(root);
+      break;
   }
   return;
 }
@@ -155,7 +259,5 @@ void ast_destroy(Node* root) {
 void ast_fold(Node* root) {
   if (!root)
     return;
-
-
   return;
 }

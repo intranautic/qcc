@@ -262,8 +262,110 @@ static Token* lexer_identifier(Source* source) {
   });
 }
 
-static Token* lexer_charconst(Source* source, encoding_t encoding) {}
-static Token* lexer_strconst(Source* source, encoding_t encoding) {}
+static Token* lexer_charconst(Source* source, encoding_t encoding) {
+  char* origin = source->cursor;
+  source->cursor++; // skip opening quote
+  
+  Token* tok = INIT_ALLOC(Token, {
+    .kind = TOKEN_LCHAR,
+    .loc = origin,
+    .line = source->line,
+    .value.i = 0
+  });
+
+  if (*source->cursor == '\'') {
+    logger_fatal(-1, "Empty character constant %s:%d\n", 
+      source->path, source->line);
+  }
+
+  if (*source->cursor == '\\') {
+    source->cursor++;
+    switch (*source->cursor) {
+      case 'n': tok->value.i = '\n'; break;
+      case 't': tok->value.i = '\t'; break;
+      case 'v': tok->value.i = '\v'; break;
+      case 'b': tok->value.i = '\b'; break;
+      case 'r': tok->value.i = '\r'; break;
+      case 'f': tok->value.i = '\f'; break;
+      case 'a': tok->value.i = '\a'; break;
+      case '\\': tok->value.i = '\\'; break;
+      case '?': tok->value.i = '\?'; break;
+      case '\'': tok->value.i = '\''; break;
+      case '\"': tok->value.i = '\"'; break;
+      case '0': tok->value.i = '\0'; break;
+      default:
+        logger_fatal(-1, "Invalid escape sequence %s:%d\n",
+          source->path, source->line);
+    }
+    source->cursor++;
+  } else {
+    tok->value.i = *source->cursor++;
+  }
+
+  if (*source->cursor != '\'') {
+    logger_fatal(-1, "Unterminated character constant %s:%d\n",
+      source->path, source->line);
+  }
+  
+  source->cursor++; // skip closing quote
+  tok->length = source->cursor - origin;
+  return tok;
+}
+
+static Token* lexer_strconst(Source* source, encoding_t encoding) {
+  char* origin = source->cursor;
+  source->cursor++; // skip opening quote
+  
+  char buffer[4096];
+  int len = 0;
+
+  while (*source->cursor && *source->cursor != '\"') {
+    if (*source->cursor == '\\') {
+      source->cursor++;
+      switch (*source->cursor) {
+        case 'n': buffer[len++] = '\n'; break;
+        case 't': buffer[len++] = '\t'; break;
+        case 'v': buffer[len++] = '\v'; break;
+        case 'b': buffer[len++] = '\b'; break;
+        case 'r': buffer[len++] = '\r'; break;
+        case 'f': buffer[len++] = '\f'; break;
+        case 'a': buffer[len++] = '\a'; break;
+        case '\\': buffer[len++] = '\\'; break;
+        case '?': buffer[len++] = '\?'; break;
+        case '\'': buffer[len++] = '\''; break;
+        case '\"': buffer[len++] = '\"'; break;
+        case '0': buffer[len++] = '\0'; break;
+        default:
+          logger_fatal(-1, "Invalid escape sequence %s:%d\n",
+            source->path, source->line);
+      }
+      source->cursor++;
+    } else if (*source->cursor == '\n') {
+      logger_fatal(-1, "Newline in string constant %s:%d\n",
+        source->path, source->line);
+    } else {
+      buffer[len++] = *source->cursor++;
+    }
+  }
+
+  if (*source->cursor != '\"') {
+    logger_fatal(-1, "Unterminated string constant %s:%d\n",
+      source->path, source->line);
+  }
+
+  buffer[len] = '\0';
+  source->cursor++; // skip closing quote
+
+  Token* tok = INIT_ALLOC(Token, {
+    .kind = TOKEN_LSTRING,
+    .loc = origin,
+    .line = source->line,
+    .length = source->cursor - origin,
+    .value.s = strdup(buffer)
+  });
+
+  return tok;
+}
 
 static int lexer_isfloat(char* cursor, int base) {
   char* end = cursor;
@@ -327,8 +429,6 @@ static Token* lexer_numconst(Source* source) {
     .line = source->line,
     .value.i = strtol(origin, &source->cursor, base)
   });
-  if (!tok->value.i)
-    return 0;
 
   tok->length = source->cursor - origin;
   return tok;

@@ -6,6 +6,20 @@
 #include "qcc/list.h"
 #include "qcc/token.h"
 
+/* Type category masks for efficient type checking */
+#define TYPE_CAT_ARITHMETIC (0x00FF)  /* All numeric types */
+#define TYPE_CAT_INTEGER   (0x001F)   /* All integer types */
+#define TYPE_CAT_FLOATING  (0x00E0)   /* All floating point types */
+#define TYPE_CAT_AGGREGATE (0x0600)   /* struct/union types */
+#define TYPE_CAT_DERIVED   (0x3800)   /* pointer/array/function types */
+
+/* Helper macros for type checking */
+#define TYPE_IS_ARITHMETIC(t) ((t)->kind & TYPE_CAT_ARITHMETIC)
+#define TYPE_IS_INTEGER(t)    ((t)->kind & TYPE_CAT_INTEGER)
+#define TYPE_IS_FLOATING(t)   ((t)->kind & TYPE_CAT_FLOATING)
+#define TYPE_IS_AGGREGATE(t)  ((t)->kind & TYPE_CAT_AGGREGATE)
+#define TYPE_IS_DERIVED(t)    ((t)->kind & TYPE_CAT_DERIVED)
+
 typedef struct type Type;
 extern Type* pred_enum;
 extern Type* pred_void;
